@@ -5,10 +5,14 @@
 If you need help, the help flag can show you available flags (`kubernetes-labels-migrator -help`).
 
 ```bash
-kubernetes-labels-migrator -deployment="my-application" -namespace="default" -label="kubernetes.io/app" -value="my-application"
+kubernetes-labels-migrator \
+      -deployment="my-application" \
+      -label="kubernetes.io/app" \
+      -namespace="default" \
+      -value="my-application"
 ```
 
-![Screenshot of a terminal with all the execution](.github/docs/demo.png "CLI demo").
+![Screenshot of a terminal with all the execution](.github/docs/demo.png "CLI demo")
 
 ## Motivation
 
@@ -23,6 +27,7 @@ TODO
 ## Zero downtime testing
 
 Using [Vegeta](https://github.com/tsenart/vegeta), we can overload the service to detect if one or more request is thrown during the process.
+
 ⚠️ During the process, pods and service will be updated, that means if you expect to port-forward the service, the connection will be lost during the migration. We suggest you to target an `Ingress` or any others way to reach the service.
 
 ### Monotoring from your terminal
