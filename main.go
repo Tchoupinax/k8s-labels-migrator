@@ -43,7 +43,7 @@ func main() {
 		logError("Namespace is mandatory")
 		os.Exit(1)
 	}
-	if labelToChangeValue == "" && goalOfOperationIsToRemoveLabel == false {
+	if labelToChangeValue == "" && !goalOfOperationIsToRemoveLabel {
 		logError("label value is mandatory")
 		os.Exit(1)
 	}
