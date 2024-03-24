@@ -1,5 +1,14 @@
 # kubernetes-labels-migrator
 
+## Installation
+
+### MacOS
+
+```bash
+brew tap tchoupinax/brew
+brew install tchoupinax/brew/kubernetes-labels-migrator
+```
+
 ## Usage
 
 If you need help, the help flag can show you available flags (`kubernetes-labels-migrator -help`).
