@@ -7,7 +7,7 @@ import (
 	"github.com/fatih/color"
 )
 
-const Version string = "0.1.0"
+const Version string = "0.1.1"
 const BuildDate string = "2024-03-24"
 
 func cliCommandDisplayHelp(args []string) {
