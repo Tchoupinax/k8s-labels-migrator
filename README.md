@@ -30,7 +30,7 @@ Using [Vegeta](https://github.com/tsenart/vegeta), we can overload the service t
 
 ⚠️ During the process, pods and service will be updated, that means if you expect to port-forward the service, the connection will be lost during the migration. We suggest you to target an `Ingress` or any others way to reach the service.
 
-### Monotoring from your terminal
+### Monitoring from your terminal
 
 #### Requirements
 
