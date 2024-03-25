@@ -11,6 +11,12 @@ brew install tchoupinax/brew/kubernetes-labels-migrator
 
 ## Usage
 
+### Disclaimer
+
+⚠️ The software is provided "as is" and you use it as your own risk. I made the best thing I could do but maybe there is a bug somewhere or your configuration has a edge case I did not anticipate. In this readme, a section describes all what is executed. The code is open, pretty short and simple so please give a look about what it is done and above all, **test outside of production**. It's a good practice.
+
+### CLI
+
 If you need help, the help flag can show you available flags (`kubernetes-labels-migrator -help`).
 
 ```bash
