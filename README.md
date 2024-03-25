@@ -87,10 +87,10 @@ echo 'GET YOUR_URL' | \
 ## Roadmap
 
 1.0.0
-- [] Sucessful migration in production with relatively high volume
-- [] Handle the fact the edited label is the only one used for the service
-- [] Documentation about potentials issues from scale (DB)
-- [] Better handling of labels added to the service and well understand of K8S's good pratices
+- [ ] Sucessful migration in production with relatively high volume
+- [ ] Handle the fact the edited label is the only one used for the service
+- [ ] Documentation about potentials issues from scale (DB)
+- [ ] Better handling of labels added to the service and well understand of K8S's good pratices
 
 0.1.0
 - [x] Successful test with zero downtime
