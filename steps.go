@@ -11,7 +11,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func Step1(
+func MigrationWorkflow(
 	namespace string,
 	clientset *kubernetes.Clientset,
 	deploymentName string,
@@ -33,7 +33,7 @@ func Step1(
 	// It's required because an error is thrown, we can not create a deployment with this property provided
 	temporalDeployment.ResourceVersion = ""
 
-	_, err = clientset.AppsV1().Deployments(namespace).Create(context.TODO(), &temporalDeployment, metav1.CreateOptions{});
+	_, err = clientset.AppsV1().Deployments(namespace).Create(context.TODO(), &temporalDeployment, metav1.CreateOptions{})
 	if err != nil {
 		if strings.Contains(err.Error(), "already exists, the server was not able to generate a unique name for the object") {
 			logWarning("1. Temporary deployment already created. Continue...")
@@ -45,7 +45,7 @@ func Step1(
 	logInfo("2. Updating the service...")
 	var temporalService = *currentService
 	delete(temporalService.Spec.Selector, changingLabelKey)
-	_, err = clientset.CoreV1().Services(namespace).Update(context.TODO(), &temporalService, metav1.UpdateOptions{});
+	_, err = clientset.CoreV1().Services(namespace).Update(context.TODO(), &temporalService, metav1.UpdateOptions{})
 	check(err)
 	logSuccess("2. Service updated")
 
@@ -54,9 +54,9 @@ func Step1(
 	for !areAllPodReady {
 		logBlockingDot()
 		time.Sleep(1 * time.Second)
-		areAllPodReady = 
-			waitUntilAllPodAreReady(clientset, namespace, "api") && 
-			waitUntilAllPodAreReady(clientset, namespace, fmt.Sprintf("%s-%s", currentDeployment.Name, "changing-label-tmp"))
+		areAllPodReady =
+			waitUntilAllPodAreReady(clientset, namespace, currentDeployment.Name) &&
+				waitUntilAllPodAreReady(clientset, namespace, fmt.Sprintf("%s-%s", currentDeployment.Name, "changing-label-tmp"))
 	}
 	fmt.Println("")
 
@@ -78,12 +78,17 @@ func Step1(
 	if removeLabel {
 		delete(futureOfficialDeployment.ObjectMeta.Labels, changingLabelKey)
 		delete(futureOfficialDeployment.Spec.Template.ObjectMeta.Labels, changingLabelKey)
-		} else {
+		delete(futureOfficialDeployment.Spec.Selector.MatchLabels, changingLabelKey)
+	} else {
+		// Label of the deployment
 		futureOfficialDeployment.ObjectMeta.Labels[changingLabelKey] = changingLabelValue
+		// Label of the pod created by the deployment
 		futureOfficialDeployment.Spec.Template.ObjectMeta.Labels[changingLabelKey] = changingLabelValue
+		// Then we must include the label in the matchSelector for the deployment to find pods
+		futureOfficialDeployment.Spec.Selector.MatchLabels[changingLabelKey] = changingLabelValue
 	}
 
-	_, err = clientset.AppsV1().Deployments(namespace).Create(context.TODO(), &futureOfficialDeployment, metav1.CreateOptions{});
+	_, err = clientset.AppsV1().Deployments(namespace).Create(context.TODO(), &futureOfficialDeployment, metav1.CreateOptions{})
 	if err != nil {
 		if strings.Contains(err.Error(), "already exists, the server was not able to generate a unique name for the object") {
 			fmt.Println("⚠️  Temporary deployment already created. Continue...")
@@ -97,7 +102,7 @@ func Step1(
 	for !areAllPodReady {
 		logBlockingDot()
 		time.Sleep(1 * time.Second)
-		areAllPodReady = waitUntilAllPodAreReady(clientset, namespace, "api")
+		areAllPodReady = waitUntilAllPodAreReady(clientset, namespace, currentDeployment.Name)
 	}
 	fmt.Println("")
 
@@ -109,7 +114,7 @@ func Step1(
 	logSuccess("7. Temporary deployment deleted")
 }
 
-func AddLabelToServiceSelector (
+func AddLabelToServiceSelector(
 	namespace string,
 	clientset *kubernetes.Clientset,
 	applicationName string,
@@ -122,7 +127,6 @@ func AddLabelToServiceSelector (
 	// Get the current service
 	currentService, err := clientset.CoreV1().Services(namespace).Get(context.TODO(), applicationName, metav1.GetOptions{})
 	check(err)
-
 
 	var futureService = *currentService
 	if removeLabel {

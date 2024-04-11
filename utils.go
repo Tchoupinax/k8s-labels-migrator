@@ -23,16 +23,6 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func concatLabels(labels map[string]string) string {
-	var concatenatedLabels []string
-
-	for key, value := range labels {
-			concatenatedLabels = append(concatenatedLabels, fmt.Sprintf("%s=%s", key, value))
-	}
-
-	return strings.Join(concatenatedLabels, ",")
-}
-
 // https://gist.github.com/r0l1/3dcbb0c8f6cfe9c66ab8008f55f8f28b
 func askForConfirmation(s string) bool {
 	reader := bufio.NewReader(os.Stdin)
