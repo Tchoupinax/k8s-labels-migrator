@@ -31,11 +31,12 @@ kubernetes-labels-migrator \
 
 ## Tutorial
 
-Let's say you are managing your application with the gitops's philosohpy ([ArgoCD](https://argo-cd.readthedocs.io/en/stable/) is really great to do the job). You want to add or edit a label. This difference has already been done by your code but ArgoCD refused to sync because of the "immutable field" error. Then following this:
-- ⚠️ First of all, nothing intervene during the operation! `kubernetes-labels-migrator` should be free until the end. If you have tools like ArgoCD that synchronize your resources, **please** ensure this feature is **disabled**.
-- You can commit the changes on the resource and observe the difference
-- Launch the script and watch the magic happens
-- According your changes, the difference should have been resolved
+Let's say you are managing your application with the GitOps philosophy (ArgoCD is really great for this job). You want to add or edit a label. This change has already been made in your code, but ArgoCD refused to sync due to the "immutable field" error. Here's what you should do:
+
+- ⚠️ First of all, ensure that nothing intervenes during the operation! kubernetes-labels-migrator should be free until the end. If you have tools like ArgoCD that synchronize your resources, please ensure this feature is disabled.
+- Commit the changes to the resource and observe the difference.
+- Launch the script and watch the magic happen.
+- According to your changes, the difference should have been resolved.
 
 ## Motivation
 
