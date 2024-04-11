@@ -29,6 +29,14 @@ kubernetes-labels-migrator \
 
 ![Screenshot of a terminal with all the execution](.github/docs/demo.png "CLI demo")
 
+## Tutorial
+
+Let's say you are managing your application with the gitops's philosohpy ([ArgoCD](https://argo-cd.readthedocs.io/en/stable/) is really great to do the job). You want to add or edit a label. This difference has already been done by your code but ArgoCD refused to sync because of the "immutable field" error. Then following this:
+- ⚠️ First of all, nothing intervene during the operation! `kubernetes-labels-migrator` should be free until the end. If you have tools like ArgoCD that synchronize your resources, **please** ensure this feature is **disabled**.
+- You can commit the changes on the resource and observe the difference
+- Launch the script and watch the magic happens
+- According your changes, the difference should have been resolved
+
 ## Motivation
 
 Deployment's labels are immutable. That means, if you have to edit, rename or add labels to a deployed application, you have to delete the deployment. On a production application, it is very annoying.

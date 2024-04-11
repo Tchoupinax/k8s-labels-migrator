@@ -18,8 +18,8 @@ func displaySummary(
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"Parameter", "Value"})
-	t.AppendRows([]table.Row{{"Deployement name", namespace}})
-	t.AppendRows([]table.Row{{"Namespace", deploymentName}})
+	t.AppendRows([]table.Row{{"Deployment name", deploymentName}})
+	t.AppendRows([]table.Row{{"Namespace", namespace}})
 	if goalOfOperationIsToRemoveLabel {
 		t.AppendRows([]table.Row{{"Label", labelToChangeKey}})
 	} else {

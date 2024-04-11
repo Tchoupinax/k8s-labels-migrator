@@ -20,6 +20,7 @@ func logBlocking(msg string) {
 	magenta := color.New(color.Bold, color.FgHiMagenta).SprintFunc()
 	fmt.Println(magenta(fmt.Sprintf("⌛️ %s", msg)))
 }
+
 func logBlockingDot() {
 	magenta := color.New(color.Bold, color.FgHiMagenta).SprintFunc()
 	fmt.Print(magenta("."))

@@ -28,8 +28,8 @@ func main() {
 	var labelToChangeValue = ""
 	var goalOfOperationIsToRemoveLabel = false
 
-	flag.StringVar(&deploymentName, "deployment", "" , "Name of the deployment to edit label")
-	flag.StringVar(&namespace, "namespace", "" , "Namespace of the deployment to edit label")
+	flag.StringVar(&deploymentName, "deployment", "", "Name of the deployment to edit label")
+	flag.StringVar(&namespace, "namespace", "", "Namespace of the deployment to edit label")
 	flag.BoolVar(&goalOfOperationIsToRemoveLabel, "remove-label", false, "If true, the label will be removed instead of be added/edited")
 	flag.StringVar(&labelToChangeKey, "label", "app.kubernetes.io/name", "Name of the label")
 	flag.StringVar(&labelToChangeValue, "value", "", "Value of the label")
@@ -62,7 +62,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	Step1(
+	MigrationWorkflow(
 		namespace,
 		clientset,
 		deploymentName,
