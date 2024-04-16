@@ -58,8 +58,12 @@ We have a deployment called `api` with labels `app=api` and `kubernetes.io/name=
 6. **Wait all pods are ready**: we repeat the operation about the new deployment.
 7. **Remove temporary deployment**: now that the deployment is ready, we can cut the temporary one and leaves in place the new deployment with modified label.
 8. **[Optional] Add the label to service selector**: some labels are recommenced by Kubernetes to be present as default label and thoses labels might be added to the service selector. That means we are making the matching set stronger.
-      - See [documentation](https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/)
-      - For the moment, only `kubernetes.io/name` is considered to be added to the service
+  - See [documentation](https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/)
+  - For the moment, only `kubernetes.io/name` is considered to be added to the service
+
+Additional documentations:
+
+- [Service is not the only resource that target pods](docs/resources-targeting-pods.md )
 
 ## Zero downtime testing
 
@@ -102,11 +106,11 @@ echo 'GET YOUR_URL' | \
 ## Roadmap
 
 1.0.0
-- [ ] Sucessful migration in production with relatively high volume
-- [ ] Handle the fact the edited label is the only one used for the service
-- [ ] Documentation about potentials issues from scale (DB)
-- [ ] Better handling of labels added to the service and well understand of K8S's good pratices
 
-0.1.0
-- [x] Successful test with zero downtime
 - [x] Basic documentation
+- [x] Successful test with zero downtime
+- [ ] All resources that match pod are managed
+- [ ] Better handling of labels added to the service and well understand of K8S's good pratices
+- [ ] Documentation about potentials issues from scale (DB)
+- [ ] Handle the fact the edited label is the only one used for the service
+- [ ] Successful migration in production with relatively high volume

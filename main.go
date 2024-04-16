@@ -61,6 +61,11 @@ func main() {
 		logInfo("Operation aborted by the user")
 		os.Exit(0)
 	}
+	c2 := askForConfirmation("I confirm that I have no gitops tool overriding my config (e.g. ArgoCD auto-sync)")
+	if !c2 {
+		logInfo("Operation aborted by the user")
+		os.Exit(0)
+	}
 
 	MigrationWorkflow(
 		namespace,
