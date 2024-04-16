@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	"k8s.io/client-go/kubernetes"
@@ -48,6 +49,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	onlyOneLabel := isTheEditedLabelTheOnlyOne(
+		namespace,
+		clientset,
+		deploymentName,
+		labelToChangeKey,
+	)
+	if onlyOneLabel {
+		logError(fmt.Sprintf("The label \"%s\" can not be edited because it's the only one in the matching set.", labelToChangeKey))
+		os.Exit(1)
+	}
+
 	displaySummary(
 		namespace,
 		deploymentName,
@@ -58,6 +70,11 @@ func main() {
 
 	c := askForConfirmation("Do you validate these parameters?")
 	if !c {
+		logInfo("Operation aborted by the user")
+		os.Exit(0)
+	}
+	c2 := askForConfirmation("I confirm that I have no gitops tool overriding my config (e.g. ArgoCD auto-sync)")
+	if !c2 {
 		logInfo("Operation aborted by the user")
 		os.Exit(0)
 	}
