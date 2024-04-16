@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	"k8s.io/client-go/kubernetes"
@@ -45,6 +46,17 @@ func main() {
 	}
 	if labelToChangeValue == "" && !goalOfOperationIsToRemoveLabel {
 		logError("label value is mandatory")
+		os.Exit(1)
+	}
+
+	onlyOneLabel := isTheEditedLabelTheOnlyOne(
+		namespace,
+		clientset,
+		deploymentName,
+		labelToChangeKey,
+	)
+	if onlyOneLabel {
+		logError(fmt.Sprintf("The label \"%s\" can not be edited because it's the only one in the matching set.", labelToChangeKey))
 		os.Exit(1)
 	}
 
