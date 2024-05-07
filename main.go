@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 
+	istio "istio.io/client-go/pkg/clientset/versioned"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -19,6 +19,7 @@ func main() {
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
+	istioClient, err := istio.NewForConfig(config)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -49,17 +50,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	onlyOneLabel := isTheEditedLabelTheOnlyOne(
-		namespace,
-		clientset,
-		deploymentName,
-		labelToChangeKey,
-	)
-	if onlyOneLabel {
-		logError(fmt.Sprintf("The label \"%s\" can not be edited because it's the only one in the matching set.", labelToChangeKey))
-		os.Exit(1)
-	}
-
+	logInfo("Analyzing your cluster...")
+	resourcesAnalyze(clientset, istioClient, namespace, deploymentName, labelToChangeKey)
+	logSuccess("Cluster ready")
 	displaySummary(
 		namespace,
 		deploymentName,

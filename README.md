@@ -22,8 +22,8 @@ If you need help, the help flag can show you available flags (`kubernetes-labels
 ```bash
 kubernetes-labels-migrator \
       -deployment="my-application" \
-      -label="kubernetes.io/app" \
       -namespace="default" \
+      -label="kubernetes.io/app" \
       -value="my-application"
 ```
 
@@ -102,6 +102,9 @@ echo 'GET YOUR_URL' | \
           latency.p95+latency.p50+latency.p25 \
           bytes_in.sum+bytes_out.sum
 ```
+### Tips
+
+- There is not diff in ArgoCD if the label does not impact matched labels
 
 ## Roadmap
 
