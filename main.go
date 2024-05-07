@@ -76,6 +76,7 @@ func main() {
 	MigrationWorkflow(
 		namespace,
 		clientset,
+		istioClient,
 		deploymentName,
 		labelToChangeKey,
 		labelToChangeValue,
@@ -86,6 +87,16 @@ func main() {
 		AddLabelToServiceSelector(
 			namespace,
 			clientset,
+			deploymentName,
+			labelToChangeKey,
+			labelToChangeValue,
+			goalOfOperationIsToRemoveLabel,
+		)
+
+		AddLabelToIstioDestinatonRulesSelector(
+			namespace,
+			clientset,
+			istioClient,
 			deploymentName,
 			labelToChangeKey,
 			labelToChangeValue,

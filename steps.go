@@ -7,13 +7,16 @@ import (
 	"strings"
 	"time"
 
+	istio "istio.io/client-go/pkg/clientset/versioned"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
 func MigrationWorkflow(
 	namespace string,
 	clientset *kubernetes.Clientset,
+	istioClient *istio.Clientset,
 	deploymentName string,
 	changingLabelKey string,
 	changingLabelValue string,
@@ -21,6 +24,7 @@ func MigrationWorkflow(
 ) {
 	currentService, _ := clientset.CoreV1().Services(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 	currentDeployment, err := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
+	currentDestinationRule, _ := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
 	if err != nil {
 		logError("No deployment found.")
 		os.Exit(1)
@@ -48,6 +52,13 @@ func MigrationWorkflow(
 	_, err = clientset.CoreV1().Services(namespace).Update(context.TODO(), &temporalService, metav1.UpdateOptions{})
 	check(err)
 	logSuccess("2. Service updated")
+
+	logInfo("2.1 Updating Istio destination rules...")
+	var temporalDestinationRule = *currentDestinationRule
+	delete(temporalDestinationRule.Spec.Subsets[0].Labels, changingLabelKey)
+	_, err = istioClient.NetworkingV1alpha3().DestinationRules(namespace).Update(context.TODO(), &temporalDestinationRule, metav1.UpdateOptions{})
+	check(err)
+	logSuccess("2.1 Istio destination rules updated")
 
 	logBlocking("3. Waiting while pods are not totally ready to handle traffic")
 	areAllPodReady := false
@@ -142,5 +153,36 @@ func AddLabelToServiceSelector(
 	check(updateServiceError)
 
 	logSuccess("8. Service configured")
+	logInfo("============================================================")
+}
+
+func AddLabelToIstioDestinatonRulesSelector(
+	namespace string,
+	clientset *kubernetes.Clientset,
+	istioClient *istio.Clientset,
+	applicationName string,
+	changingLabelKey string,
+	changingLabelValue string,
+	removeLabel bool,
+) {
+	logInfo("====== Additionnal step ====================================")
+	logInfo("9. Add the label as a selector in istio destination rules...")
+	currentDestinationRule, err := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Get(context.TODO(), applicationName, v1.GetOptions{})
+	check(err)
+
+	var futureDestinationRule = *currentDestinationRule
+	if removeLabel {
+		// Update the value of the label
+		delete(futureDestinationRule.Spec.Subsets[0].Labels, changingLabelKey)
+	} else {
+		futureDestinationRule.Spec.Subsets[0].Labels[changingLabelKey] = changingLabelValue
+		// If the string is empty, remove the label (see deployment)
+	}
+
+	// Update the service in the cluster
+	_, updateDestinationRuleError := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Update(context.TODO(), &futureDestinationRule, metav1.UpdateOptions{})
+	check(updateDestinationRuleError)
+
+	logSuccess("9. Istio destination rules configured")
 	logInfo("============================================================")
 }
