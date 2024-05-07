@@ -17,6 +17,6 @@ func waitUntilAllPodAreReady(
 		logError(err.Error())
 		return false
 	}
-	currentDeploymentHasAllPodReady := deployment.Status.Replicas - deployment.Status.ReadyReplicas == 0
+	currentDeploymentHasAllPodReady := deployment.Status.Replicas-deployment.Status.ReadyReplicas == 0 && deployment.Status.Replicas > 1
 	return currentDeploymentHasAllPodReady
 }
