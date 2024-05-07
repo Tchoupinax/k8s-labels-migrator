@@ -20,6 +20,7 @@ func main() {
 
 	clientset, err := kubernetes.NewForConfig(config)
 	istioClient, err := istio.NewForConfig(config)
+	//crdClient, err := dynamic.NewForConfig(config)
 	if err != nil {
 		panic(err.Error())
 	}
