@@ -7,9 +7,12 @@ import (
 	"strings"
 	"time"
 
+	keda "github.com/Tchoupinax/k8s-labels-migrator/resources"
+	utils "github.com/Tchoupinax/k8s-labels-migrator/utils"
 	istio "istio.io/client-go/pkg/clientset/versioned"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -17,6 +20,7 @@ func MigrationWorkflow(
 	namespace string,
 	clientset *kubernetes.Clientset,
 	istioClient *istio.Clientset,
+	crdClient *dynamic.DynamicClient,
 	deploymentName string,
 	changingLabelKey string,
 	changingLabelValue string,
@@ -26,11 +30,11 @@ func MigrationWorkflow(
 	currentDeployment, err := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 	currentDestinationRule, _ := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
 	if err != nil {
-		logError("No deployment found.")
+		utils.LogError("No deployment found.")
 		os.Exit(1)
 	}
 
-	logInfo("1. Creating the clone deployment")
+	utils.LogInfo("1. Creating the clone deployment")
 	var temporalDeployment = *currentDeployment
 	temporalDeployment.GenerateName = fmt.Sprintf("%s-%s", currentDeployment.Name, "changing-label-tmp")
 	temporalDeployment.Name = fmt.Sprintf("%s-%s", currentDeployment.Name, "changing-label-tmp")
@@ -40,30 +44,33 @@ func MigrationWorkflow(
 	_, err = clientset.AppsV1().Deployments(namespace).Create(context.TODO(), &temporalDeployment, metav1.CreateOptions{})
 	if err != nil {
 		if strings.Contains(err.Error(), "already exists, the server was not able to generate a unique name for the object") {
-			logWarning("1. Temporary deployment already created. Continue...")
+			utils.LogWarning("1. Temporary deployment already created. Continue...")
 		}
 	} else {
-		logSuccess("1. Deployment replicated")
+		utils.LogSuccess("1. Deployment replicated")
 	}
 
-	logInfo("2. Updating the service...")
+	utils.LogInfo("2. Updating the service...")
 	var temporalService = *currentService
 	delete(temporalService.Spec.Selector, changingLabelKey)
 	_, err = clientset.CoreV1().Services(namespace).Update(context.TODO(), &temporalService, metav1.UpdateOptions{})
 	check(err)
-	logSuccess("2. Service updated")
+	utils.LogSuccess("2. Service updated")
 
-	logInfo("2.1 Updating Istio destination rules...")
+	utils.LogInfo("2.1 Updating Istio destination rules...")
 	var temporalDestinationRule = *currentDestinationRule
 	delete(temporalDestinationRule.Spec.Subsets[0].Labels, changingLabelKey)
 	_, err = istioClient.NetworkingV1alpha3().DestinationRules(namespace).Update(context.TODO(), &temporalDestinationRule, metav1.UpdateOptions{})
 	check(err)
-	logSuccess("2.1 Istio destination rules updated")
+	utils.LogSuccess("2.1 Istio destination rules updated")
 
-	logBlocking("3. Waiting while pods are not totally ready to handle traffic")
+	utils.LogInfo("2.2 Keda")
+	keda.PauseScaledObject(crdClient, clientset, deploymentName, namespace)
+
+	utils.LogBlocking("3. Waiting while pods are not totally ready to handle traffic")
 	areAllPodReady := false
 	for !areAllPodReady {
-		logBlockingDot()
+		utils.LogBlockingDot()
 		time.Sleep(1 * time.Second)
 		areAllPodReady =
 			waitUntilAllPodAreReady(clientset, namespace, currentDeployment.Name) &&
@@ -71,13 +78,13 @@ func MigrationWorkflow(
 	}
 	fmt.Println("")
 
-	logInfo("4. Delete the old deployment...")
+	utils.LogInfo("4. Delete the old deployment...")
 	// Delete the old deployment
 	deleteError := clientset.AppsV1().Deployments(namespace).Delete(context.TODO(), currentDeployment.Name, *metav1.NewDeleteOptions(0))
 	check(deleteError)
-	logSuccess("4. Old deployment deleted")
+	utils.LogSuccess("4. Old deployment deleted")
 
-	logInfo("5. Creating the original deployment with modified label")
+	utils.LogInfo("5. Creating the original deployment with modified label")
 	var futureOfficialDeployment = *currentDeployment
 	futureOfficialDeployment.GenerateName = deploymentName
 	futureOfficialDeployment.Name = deploymentName
@@ -106,23 +113,23 @@ func MigrationWorkflow(
 		}
 		fmt.Println(err)
 	}
-	logSuccess("5. Deployment created")
+	utils.LogSuccess("5. Deployment created")
 
-	logBlocking("6. Waiting while pods are not totally ready to handle traffic")
+	utils.LogBlocking("6. Waiting while pods are not totally ready to handle traffic")
 	areAllPodReady = false
 	for !areAllPodReady {
-		logBlockingDot()
+		utils.LogBlockingDot()
 		time.Sleep(1 * time.Second)
 		areAllPodReady = waitUntilAllPodAreReady(clientset, namespace, currentDeployment.Name)
 	}
 	fmt.Println("")
 
-	logInfo("7. Deleting temporal deployment...")
+	utils.LogInfo("7. Deleting temporal deployment...")
 	time.Sleep(1 * time.Second)
 	// Delete the temporal deployment
 	errDeleteTmpDeploy := clientset.AppsV1().Deployments(namespace).Delete(context.TODO(), fmt.Sprintf("%s-%s", currentDeployment.Name, "changing-label-tmp"), metav1.DeleteOptions{})
 	check(errDeleteTmpDeploy)
-	logSuccess("7. Temporary deployment deleted")
+	utils.LogSuccess("7. Temporary deployment deleted")
 }
 
 func AddLabelToServiceSelector(
@@ -133,8 +140,8 @@ func AddLabelToServiceSelector(
 	changingLabelValue string,
 	removeLabel bool,
 ) {
-	logInfo("====== Additionnal step ====================================")
-	logInfo("8. Add the label as a selector in the service...")
+	utils.LogInfo("====== Additionnal step ====================================")
+	utils.LogInfo("8. Add the label as a selector in the service...")
 	// Get the current service
 	currentService, err := clientset.CoreV1().Services(namespace).Get(context.TODO(), applicationName, metav1.GetOptions{})
 	check(err)
@@ -152,8 +159,8 @@ func AddLabelToServiceSelector(
 	_, updateServiceError := clientset.CoreV1().Services(namespace).Update(context.TODO(), &futureService, metav1.UpdateOptions{})
 	check(updateServiceError)
 
-	logSuccess("8. Service configured")
-	logInfo("============================================================")
+	utils.LogSuccess("8. Service configured")
+	utils.LogInfo("============================================================")
 }
 
 func AddLabelToIstioDestinatonRulesSelector(
@@ -165,8 +172,8 @@ func AddLabelToIstioDestinatonRulesSelector(
 	changingLabelValue string,
 	removeLabel bool,
 ) {
-	logInfo("====== Additionnal step ====================================")
-	logInfo("9. Add the label as a selector in istio destination rules...")
+	utils.LogInfo("====== Additionnal step ====================================")
+	utils.LogInfo("9. Add the label as a selector in istio destination rules...")
 	currentDestinationRule, err := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Get(context.TODO(), applicationName, v1.GetOptions{})
 	check(err)
 
@@ -183,6 +190,6 @@ func AddLabelToIstioDestinatonRulesSelector(
 	_, updateDestinationRuleError := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Update(context.TODO(), &futureDestinationRule, metav1.UpdateOptions{})
 	check(updateDestinationRuleError)
 
-	logSuccess("9. Istio destination rules configured")
-	logInfo("============================================================")
+	utils.LogSuccess("9. Istio destination rules configured")
+	utils.LogInfo("============================================================")
 }

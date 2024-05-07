@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"strings"
+
+	utils "github.com/Tchoupinax/k8s-labels-migrator/utils"
 )
 
 func check(e error) {
@@ -28,7 +31,7 @@ func askForConfirmation(s string) bool {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
-		logWarning(fmt.Sprintf("%s [y/n]: ", s))
+		utils.LogWarning(fmt.Sprintf("%s [y/n]: ", s))
 
 		response, err := reader.ReadString('\n')
 		if err != nil {
@@ -50,4 +53,22 @@ func If[T any](cond bool, vtrue, vfalse T) T {
 		return vtrue
 	}
 	return vfalse
+}
+
+func mapToArray(myMap map[string]string) []string {
+	v := make([]string, 0, len(myMap))
+	for key, value := range myMap {
+		v = append(v, key+"="+value)
+	}
+	slices.Sort(v)
+	return v
+}
+
+func arrayContains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }

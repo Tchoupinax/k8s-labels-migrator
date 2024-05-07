@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
+	utils "github.com/Tchoupinax/k8s-labels-migrator/utils"
 	"github.com/jedib0t/go-pretty/v6/table"
 	istio "istio.io/client-go/pkg/clientset/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -51,7 +53,7 @@ func resourcesAnalyze(
 	//	Version:  "v1alpha1",
 	//	Resource: "scaledobjects",
 	//}
-	//kedaScaledObject, _ := crdClient.Resource(crdGVR).Namespace(namespace).Get(context.TODO(), "account-contract-live", v1.GetOptions{})
+	//kedaScaledObject, _ := crdClient.Resource(crdGVR).Namespace(namespace).Get(context.TODO(), "", v1.GetOptions{})
 
 	deploymentSelectorLabels := deployment.Spec.Template.ObjectMeta.Labels
 	serviceSelectorLabels := service.Spec.Selector
@@ -62,12 +64,13 @@ func resourcesAnalyze(
 	fmt.Println()
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"Type", "Name", "Detected", "labels count", "valid"})
+	t.AppendHeader(table.Row{"Type", "Name", "Detected", "labels count", "labels", "valid"})
 	t.AppendRows([]table.Row{{
 		"Deployment",
 		If(deployment.Name != "", deployment.Name, "—"),
 		If(deployment != nil, "✅", "❌"),
 		len(deploymentSelectorLabels),
+		strings.Join(mapToArray(deploymentSelectorLabels), "\n"),
 		If(len(deploymentSelectorLabels) == 1 && deploymentSelectorLabels[changingLabelKey] != "", "❌", "✅"),
 	}})
 	t.AppendRows([]table.Row{{
@@ -75,6 +78,7 @@ func resourcesAnalyze(
 		If(service.Name != "", service.Name, "—"),
 		If(service.Name != "", "✅", "❌"),
 		len(serviceSelectorLabels),
+		strings.Join(mapToArray(serviceSelectorLabels), "\n"),
 		If(len(serviceSelectorLabels) == 1 && serviceSelectorLabels[changingLabelKey] != "", "❌", "✅"),
 	}})
 	t.AppendRows([]table.Row{{
@@ -82,13 +86,7 @@ func resourcesAnalyze(
 		If(service.Name != "", destinationRule.Name, "—"),
 		If(service.Name != "", "✅", "❌"),
 		len(destinationRuleSelectorLabels),
-		If(len(destinationRuleSelectorLabels) == 1 && destinationRuleSelectorLabels[changingLabelKey] != "", "❌", "✅"),
-	}})
-	t.AppendRows([]table.Row{{
-		"<Keda> DestinationRule",
-		If(service.Name != "", destinationRule.Name, "—"),
-		If(service.Name != "", "✅", "❌"),
-		len(destinationRuleSelectorLabels),
+		strings.Join(mapToArray(destinationRuleSelectorLabels), "\n"),
 		If(len(destinationRuleSelectorLabels) == 1 && destinationRuleSelectorLabels[changingLabelKey] != "", "❌", "✅"),
 	}})
 	t.SetStyle(table.StyleColoredBright)
@@ -96,12 +94,12 @@ func resourcesAnalyze(
 	fmt.Println()
 
 	if len(deploymentSelectorLabels) == 1 && deploymentSelectorLabels[changingLabelKey] != "" {
-		logError(fmt.Sprintf("The label \"%s\" can not be edited because it's the only one in the matching set for the deployment", changingLabelKey))
+		utils.LogError(fmt.Sprintf("The label \"%s\" can not be edited because it's the only one in the matching set for the deployment", changingLabelKey))
 		os.Exit(1)
 	}
 
 	if len(serviceSelectorLabels) == 1 && serviceSelectorLabels[changingLabelKey] != "" {
-		logError(fmt.Sprintf("The label \"%s\" can not be edited because it's the only one in the matching set for the service", changingLabelKey))
+		utils.LogError(fmt.Sprintf("The label \"%s\" can not be edited because it's the only one in the matching set for the service", changingLabelKey))
 		os.Exit(1)
 	}
 }
