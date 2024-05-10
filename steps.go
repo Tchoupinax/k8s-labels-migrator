@@ -130,6 +130,9 @@ func MigrationWorkflow(
 	errDeleteTmpDeploy := clientset.AppsV1().Deployments(namespace).Delete(context.TODO(), fmt.Sprintf("%s-%s", currentDeployment.Name, "changing-label-tmp"), metav1.DeleteOptions{})
 	utils.Check(errDeleteTmpDeploy)
 	utils.LogSuccess("7. Temporary deployment deleted")
+
+	utils.LogInfo("8 Keda")
+	keda.ResumeScaledObject(crdClient, clientset, deploymentName, namespace)
 }
 
 func AddLabelToServiceSelector(
