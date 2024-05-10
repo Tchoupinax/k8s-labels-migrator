@@ -35,7 +35,6 @@ func main() {
 	var matcherLabels = []string{
 		"app.kubernetes.io/instance",
 		"app.kubernetes.io/name",
-		"app.kubernetes.io/version",
 	}
 
 	flag.StringVar(&deploymentName, "deployment", "", "Name of the deployment to edit label")

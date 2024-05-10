@@ -112,8 +112,10 @@ echo 'GET YOUR_URL' | \
 
 - [x] Basic documentation
 - [x] Successful test with zero downtime
-- [ ] All resources that match pod are managed
-- [ ] Better handling of labels added to the service and well understand of K8S's good pratices
+- [ ] Handle complexe resources (see [Managed resources](docs/managed-resources.md))
+- [x] Better handling of labels added to the service and well understand of K8S's good pratices
+      - Matching labels are `app.kubernetes.io/instance` and `app.kubernetes.io/name`,
 - [ ] Documentation about potentials issues from scale (DB)
-- [ ] Handle the fact the edited label is the only one used for the service
+- [x] Handle the fact the edited label is the only one used for the service
+      - A warning is displayed
 - [ ] Successful migration in production with relatively high volume
