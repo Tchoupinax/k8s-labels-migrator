@@ -50,14 +50,14 @@ func MigrationWorkflow(
 		utils.LogSuccess("1. Deployment replicated")
 	}
 
-	utils.LogInfo("2. Updating the service...")
+	utils.LogInfo("2. Updating the service")
 	var temporalService = *currentService
 	delete(temporalService.Spec.Selector, changingLabelKey)
 	_, err = clientset.CoreV1().Services(namespace).Update(context.TODO(), &temporalService, metav1.UpdateOptions{})
 	utils.Check(err)
 	utils.LogSuccess("2. Service updated")
 
-	utils.LogInfo("2.1 Updating Istio destination rules...")
+	utils.LogInfo("2.1 Updating Istio destination rules")
 	var temporalDestinationRule = currentDestinationRule
 	delete(temporalDestinationRule.Spec.Subsets[0].Labels, changingLabelKey)
 	_, err = istioClient.NetworkingV1alpha3().DestinationRules(namespace).Update(context.TODO(), temporalDestinationRule, metav1.UpdateOptions{})
@@ -67,7 +67,7 @@ func MigrationWorkflow(
 	utils.LogInfo("2.2 Keda")
 	keda.PauseScaledObject(crdClient, clientset, deploymentName, namespace)
 
-	utils.LogBlocking("3. Waiting while pods are not totally ready to handle traffic")
+	utils.LogBlocking("3. Waiting while temporals pods are not totally ready to handle traffic")
 	areAllPodReady := false
 	for !areAllPodReady {
 		utils.LogBlockingDot()
@@ -78,7 +78,7 @@ func MigrationWorkflow(
 	}
 	fmt.Println("")
 
-	utils.LogInfo("4. Delete the old deployment...")
+	utils.LogInfo("4. Delete the old deployment")
 	// Delete the old deployment
 	deleteError := clientset.AppsV1().Deployments(namespace).Delete(context.TODO(), currentDeployment.Name, *metav1.NewDeleteOptions(0))
 	utils.Check(deleteError)
@@ -115,7 +115,7 @@ func MigrationWorkflow(
 	}
 	utils.LogSuccess("5. Deployment created")
 
-	utils.LogBlocking("6. Waiting while pods are not totally ready to handle traffic")
+	utils.LogBlocking("6. Waiting while final pods are not totally ready to handle traffic")
 	areAllPodReady = false
 	for !areAllPodReady {
 		utils.LogBlockingDot()
@@ -124,7 +124,7 @@ func MigrationWorkflow(
 	}
 	fmt.Println("")
 
-	utils.LogInfo("7. Deleting temporal deployment...")
+	utils.LogInfo("7. Deleting temporal deployment")
 	time.Sleep(1 * time.Second)
 	// Delete the temporal deployment
 	errDeleteTmpDeploy := clientset.AppsV1().Deployments(namespace).Delete(context.TODO(), fmt.Sprintf("%s-%s", currentDeployment.Name, "changing-label-tmp"), metav1.DeleteOptions{})

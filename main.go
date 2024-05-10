@@ -2,9 +2,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	utils "github.com/Tchoupinax/k8s-labels-migrator/utils"
+	"github.com/mbndr/figlet4go"
 	istio "istio.io/client-go/pkg/clientset/versioned"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -63,6 +65,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Print("\033[H\033[2J")
+	ascii := figlet4go.NewAsciiRender()
+	renderStr, _ := ascii.Render("k8s labels migrator")
+	fmt.Print(renderStr)
+
 	utils.LogInfo("Analyzing your cluster...")
 	resourcesAnalyze(clientset, istioClient, namespace, deploymentName, labelToChangeKey)
 	utils.LogSuccess("Cluster ready")
@@ -84,6 +91,14 @@ func main() {
 		utils.LogInfo("Operation aborted by the user")
 		os.Exit(0)
 	}
+
+	fmt.Println("")
+	fmt.Println("")
+	fmt.Println("")
+	utils.LogWarning("PLEASE DO NOT INTERRUPT THE PROCESS UNTIL THE END!")
+	fmt.Println("")
+	fmt.Println("")
+	fmt.Println("")
 
 	MigrationWorkflow(
 		namespace,
@@ -116,4 +131,8 @@ func main() {
 			goalOfOperationIsToRemoveLabel,
 		)
 	}
+
+	fmt.Println("")
+	utils.LogSuccess("Migration terminated with success!")
+	fmt.Println("")
 }

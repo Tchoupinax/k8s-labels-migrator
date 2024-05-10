@@ -27,7 +27,7 @@ func PauseScaledObject(
 	}
 	kedaScaledObject, _ := crdClient.Resource(crdGVR).Namespace(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
 	if kedaScaledObject != nil {
-		utils.LogInfo("Keda Scaled Object detected")
+		utils.LogInfo("2.2 Keda Scaled Object detected")
 		// Add the annotation "autoscaling.keda.sh/paused"
 		kedaScaledObject.Object["metadata"].(map[string]interface{})["annotations"].(map[string]interface{})["autoscaling.keda.sh/paused"] = "true"
 		_, updateKedaError := crdClient.Resource(crdGVR).Namespace(namespace).Update(context.TODO(), kedaScaledObject, v1.UpdateOptions{})
@@ -41,7 +41,7 @@ func PauseScaledObject(
 		}
 		fmt.Println()
 	} else {
-		utils.LogInfo("Any Keda Scaled Object detected")
+		utils.LogInfo("2.2 Any Keda Scaled Object detected")
 	}
 }
 
@@ -58,7 +58,7 @@ func ResumeScaledObject(
 	}
 	kedaScaledObject, _ := crdClient.Resource(crdGVR).Namespace(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
 	if kedaScaledObject != nil {
-		utils.LogInfo("Keda Scaled Object detected")
+		utils.LogInfo("2.2 Keda Scaled Object detected")
 		delete(
 			kedaScaledObject.Object["metadata"].(map[string]interface{})["annotations"].(map[string]interface{}),
 			"autoscaling.keda.sh/paused",
@@ -67,6 +67,6 @@ func ResumeScaledObject(
 		_, updateKedaError := crdClient.Resource(crdGVR).Namespace(namespace).Update(context.TODO(), kedaScaledObject, v1.UpdateOptions{})
 		utils.Check(updateKedaError)
 	} else {
-		utils.LogInfo("Any Keda Scaled Object detected")
+		utils.LogInfo("2.2 Any Keda Scaled Object detected")
 	}
 }

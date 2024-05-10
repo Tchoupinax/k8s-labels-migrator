@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	utils "github.com/Tchoupinax/k8s-labels-migrator/utils"
-	"github.com/jedib0t/go-pretty/v6/table"
+	table "github.com/jedib0t/go-pretty/v6/table"
 	istio "istio.io/client-go/pkg/clientset/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -22,7 +22,6 @@ func displaySummary(
 ) {
 	fmt.Println()
 	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"Parameter", "Value"})
 	t.AppendRows([]table.Row{{"Deployment name", deploymentName}})
 	t.AppendRows([]table.Row{{"Namespace", namespace}})
@@ -32,7 +31,8 @@ func displaySummary(
 		t.AppendRows([]table.Row{{"Label", fmt.Sprintf("%s=%s", labelToChangeKey, labelToChangeValue)}})
 	}
 	t.AppendRows([]table.Row{{"Will the label be removed?", goalOfOperationIsToRemoveLabel}})
-	t.SetStyle(table.StyleColoredBright)
+	t.SetStyle(table.StyleColoredBlackOnYellowWhite)
+	t.SetOutputMirror(os.Stdout)
 	t.Render()
 	fmt.Println()
 }
@@ -89,7 +89,7 @@ func resourcesAnalyze(
 		strings.Join(utils.MapToArray(destinationRuleSelectorLabels), "\n"),
 		utils.If(len(destinationRuleSelectorLabels) == 1 && destinationRuleSelectorLabels[changingLabelKey] != "", "❌", "✅"),
 	}})
-	t.SetStyle(table.StyleColoredBright)
+	t.SetStyle(table.StyleColoredBlackOnYellowWhite)
 	t.Render()
 	fmt.Println()
 
