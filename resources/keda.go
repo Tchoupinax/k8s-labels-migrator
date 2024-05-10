@@ -35,7 +35,7 @@ func PauseScaledObject(
 
 		utils.LogSuccess("Keda object paused ⏸️")
 		utils.LogBlocking("Waiting randomly 5 seconds to ensure keda controller registered the update")
-		for range 5 {
+		for i := 1; i < 5; i++ {
 			utils.LogBlockingDot()
 			time.Sleep(1 * time.Second)
 		}
