@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	utils "github.com/Tchoupinax/k8s-labels-migrator/utils"
+	"github.com/Tchoupinax/k8s-labels-migrator/utils"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
@@ -30,7 +30,9 @@ func PauseScaledObject(
 		utils.LogInfo("Keda Scaled Object detected")
 		// Add the annotation "autoscaling.keda.sh/paused"
 		kedaScaledObject.Object["metadata"].(map[string]interface{})["annotations"].(map[string]interface{})["autoscaling.keda.sh/paused"] = "true"
-		crdClient.Resource(crdGVR).Namespace(namespace).Update(context.TODO(), kedaScaledObject, v1.UpdateOptions{})
+		_, updateKedaError := crdClient.Resource(crdGVR).Namespace(namespace).Update(context.TODO(), kedaScaledObject, v1.UpdateOptions{})
+		utils.Check(updateKedaError)
+
 		utils.LogSuccess("Keda object paused ⏸️")
 		utils.LogBlocking("Waiting randomly 5 seconds to ensure keda controller registered the update")
 		for range 5 {
@@ -62,7 +64,8 @@ func ResumeScaledObject(
 			"autoscaling.keda.sh/paused",
 		)
 		utils.LogSuccess("Keda object resumed ▶️")
-		crdClient.Resource(crdGVR).Namespace(namespace).Update(context.TODO(), kedaScaledObject, v1.UpdateOptions{})
+		_, updateKedaError := crdClient.Resource(crdGVR).Namespace(namespace).Update(context.TODO(), kedaScaledObject, v1.UpdateOptions{})
+		utils.Check(updateKedaError)
 	} else {
 		utils.LogInfo("Any Keda Scaled Object detected")
 	}

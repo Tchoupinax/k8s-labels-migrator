@@ -67,27 +67,27 @@ func resourcesAnalyze(
 	t.AppendHeader(table.Row{"Type", "Name", "Detected", "labels count", "labels", "valid"})
 	t.AppendRows([]table.Row{{
 		"Deployment",
-		If(deployment.Name != "", deployment.Name, "—"),
-		If(deployment != nil, "✅", "❌"),
+		utils.If(deployment.Name != "", deployment.Name, "—"),
+		utils.If(deployment != nil, "✅", "❌"),
 		len(deploymentSelectorLabels),
-		strings.Join(mapToArray(deploymentSelectorLabels), "\n"),
-		If(len(deploymentSelectorLabels) == 1 && deploymentSelectorLabels[changingLabelKey] != "", "❌", "✅"),
+		strings.Join(utils.MapToArray(deploymentSelectorLabels), "\n"),
+		utils.If(len(deploymentSelectorLabels) == 1 && deploymentSelectorLabels[changingLabelKey] != "", "❌", "✅"),
 	}})
 	t.AppendRows([]table.Row{{
 		"Service",
-		If(service.Name != "", service.Name, "—"),
-		If(service.Name != "", "✅", "❌"),
+		utils.If(service.Name != "", service.Name, "—"),
+		utils.If(service.Name != "", "✅", "❌"),
 		len(serviceSelectorLabels),
-		strings.Join(mapToArray(serviceSelectorLabels), "\n"),
-		If(len(serviceSelectorLabels) == 1 && serviceSelectorLabels[changingLabelKey] != "", "❌", "✅"),
+		strings.Join(utils.MapToArray(serviceSelectorLabels), "\n"),
+		utils.If(len(serviceSelectorLabels) == 1 && serviceSelectorLabels[changingLabelKey] != "", "❌", "✅"),
 	}})
 	t.AppendRows([]table.Row{{
 		"<Istio> DestinationRule",
-		If(service.Name != "", destinationRule.Name, "—"),
-		If(service.Name != "", "✅", "❌"),
+		utils.If(service.Name != "", destinationRule.Name, "—"),
+		utils.If(service.Name != "", "✅", "❌"),
 		len(destinationRuleSelectorLabels),
-		strings.Join(mapToArray(destinationRuleSelectorLabels), "\n"),
-		If(len(destinationRuleSelectorLabels) == 1 && destinationRuleSelectorLabels[changingLabelKey] != "", "❌", "✅"),
+		strings.Join(utils.MapToArray(destinationRuleSelectorLabels), "\n"),
+		utils.If(len(destinationRuleSelectorLabels) == 1 && destinationRuleSelectorLabels[changingLabelKey] != "", "❌", "✅"),
 	}})
 	t.SetStyle(table.StyleColoredBright)
 	t.Render()

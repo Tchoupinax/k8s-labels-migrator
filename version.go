@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	utils "github.com/Tchoupinax/k8s-labels-migrator/utils"
 	"github.com/fatih/color"
 )
 
@@ -11,7 +12,7 @@ const Version string = "0.1.2"
 const BuildDate string = "2024-04-11"
 
 func cliCommandDisplayHelp(args []string) {
-	displayVersion := stringInSlice("-v", args[1:]) || stringInSlice("--version", args[1:])
+	displayVersion := utils.StringInSlice("-v", args[1:]) || utils.StringInSlice("--version", args[1:])
 
 	if displayVersion {
 		bold := color.New(color.Bold).SprintFunc()

@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"bufio"
@@ -7,17 +7,15 @@ import (
 	"os"
 	"slices"
 	"strings"
-
-	utils "github.com/Tchoupinax/k8s-labels-migrator/utils"
 )
 
-func check(e error) {
+func Check(e error) {
 	if e != nil {
 		panic(e)
 	}
 }
 
-func stringInSlice(a string, list []string) bool {
+func StringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
 			return true
@@ -27,11 +25,11 @@ func stringInSlice(a string, list []string) bool {
 }
 
 // https://gist.github.com/r0l1/3dcbb0c8f6cfe9c66ab8008f55f8f28b
-func askForConfirmation(s string) bool {
+func AskForConfirmation(s string) bool {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
-		utils.LogWarning(fmt.Sprintf("%s [y/n]: ", s))
+		LogWarning(fmt.Sprintf("%s [y/n]: ", s))
 
 		response, err := reader.ReadString('\n')
 		if err != nil {
@@ -55,7 +53,7 @@ func If[T any](cond bool, vtrue, vfalse T) T {
 	return vfalse
 }
 
-func mapToArray(myMap map[string]string) []string {
+func MapToArray(myMap map[string]string) []string {
 	v := make([]string, 0, len(myMap))
 	for key, value := range myMap {
 		v = append(v, key+"="+value)
@@ -64,7 +62,7 @@ func mapToArray(myMap map[string]string) []string {
 	return v
 }
 
-func arrayContains(s []string, e string) bool {
+func ArrayContains(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {
 			return true

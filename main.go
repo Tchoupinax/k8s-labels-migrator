@@ -21,7 +21,13 @@ func main() {
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
 	istioClient, err := istio.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
 	crdClient, err := dynamic.NewForConfig(config)
 	if err != nil {
 		panic(err.Error())
@@ -68,12 +74,12 @@ func main() {
 		goalOfOperationIsToRemoveLabel,
 	)
 
-	c := askForConfirmation("Do you validate these parameters?")
+	c := utils.AskForConfirmation("Do you validate these parameters?")
 	if !c {
 		utils.LogInfo("Operation aborted by the user")
 		os.Exit(0)
 	}
-	c2 := askForConfirmation("I confirm that I have no gitops tool overriding my config (e.g. ArgoCD auto-sync)")
+	c2 := utils.AskForConfirmation("I confirm that I have no gitops tool overriding my config (e.g. ArgoCD auto-sync)")
 	if !c2 {
 		utils.LogInfo("Operation aborted by the user")
 		os.Exit(0)
@@ -90,7 +96,7 @@ func main() {
 		goalOfOperationIsToRemoveLabel,
 	)
 
-	if arrayContains(matcherLabels, labelToChangeKey) {
+	if utils.ArrayContains(matcherLabels, labelToChangeKey) {
 		AddLabelToServiceSelector(
 			namespace,
 			clientset,
