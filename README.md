@@ -63,7 +63,7 @@ We have a deployment called `api` with labels `app=api` and `kubernetes.io/name=
 
 Additional documentations:
 
-- [Service is not the only resource that target pods](docs/resources-targeting-pods.md )
+- [Managed resources](docs/managed-resources.md)
 
 ## Zero downtime testing
 
