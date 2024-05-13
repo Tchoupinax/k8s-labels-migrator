@@ -71,7 +71,7 @@ func main() {
 	fmt.Print(renderStr)
 
 	utils.LogInfo("Analyzing your cluster...")
-	resourcesAnalyze(clientset, istioClient, namespace, deploymentName, labelToChangeKey)
+	resourcesAnalyze(clientset, istioClient, crdClient, namespace, deploymentName, labelToChangeKey)
 	utils.LogSuccess("Cluster ready")
 	displaySummary(
 		namespace,

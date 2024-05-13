@@ -10,6 +10,8 @@ import (
 	table "github.com/jedib0t/go-pretty/v6/table"
 	istio "istio.io/client-go/pkg/clientset/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -40,7 +42,7 @@ func displaySummary(
 func resourcesAnalyze(
 	clientset *kubernetes.Clientset,
 	istioClient *istio.Clientset,
-	//crdClient *dynamic.DynamicClient,
+	crdClient *dynamic.DynamicClient,
 	namespace string,
 	deploymentName string,
 	changingLabelKey string,
@@ -48,25 +50,23 @@ func resourcesAnalyze(
 	deployment, _ := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
 	service, _ := clientset.CoreV1().Services(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
 	destinationRule, _ := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
-	//crdGVR := schema.GroupVersionResource{
-	//	Group:    "keda.sh",
-	//	Version:  "v1alpha1",
-	//	Resource: "scaledobjects",
-	//}
-	//kedaScaledObject, _ := crdClient.Resource(crdGVR).Namespace(namespace).Get(context.TODO(), "", v1.GetOptions{})
+	crdGVR := schema.GroupVersionResource{
+		Group:    "keda.sh",
+		Version:  "v1alpha1",
+		Resource: "scaledobjects",
+	}
+	kedaScaledObject, _ := crdClient.Resource(crdGVR).Namespace(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
 
 	deploymentSelectorLabels := deployment.Spec.Template.ObjectMeta.Labels
 	serviceSelectorLabels := service.Spec.Selector
 	destinationRuleSelectorLabels := destinationRule.Spec.Subsets[0].Labels
-	// Keda uses deployment name, lol!
-	//kedaScaledObject.Object["spec"].(map[string]interface{})["scaleTargetRef"]
 
 	fmt.Println()
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"Type", "Name", "Detected", "labels count", "labels", "valid"})
 	t.AppendRows([]table.Row{{
-		"Deployment",
+		"<K8S>   Deployment",
 		utils.If(deployment.Name != "", deployment.Name, "—"),
 		utils.If(deployment != nil, "✅", "❌"),
 		len(deploymentSelectorLabels),
@@ -74,7 +74,7 @@ func resourcesAnalyze(
 		utils.If(len(deploymentSelectorLabels) == 1 && deploymentSelectorLabels[changingLabelKey] != "", "❌", "✅"),
 	}})
 	t.AppendRows([]table.Row{{
-		"Service",
+		"<K8S>   Service",
 		utils.If(service.Name != "", service.Name, "—"),
 		utils.If(service.Name != "", "✅", "❌"),
 		len(serviceSelectorLabels),
@@ -88,6 +88,14 @@ func resourcesAnalyze(
 		len(destinationRuleSelectorLabels),
 		strings.Join(utils.MapToArray(destinationRuleSelectorLabels), "\n"),
 		utils.If(len(destinationRuleSelectorLabels) == 1 && destinationRuleSelectorLabels[changingLabelKey] != "", "❌", "✅"),
+	}})
+	t.AppendRows([]table.Row{{
+		"<Keda>  ScaledObject",
+		utils.If(service.Name != "", kedaScaledObject.Object["metadata"].(map[string]interface{})["name"], "—"),
+		utils.If(kedaScaledObject != nil, "✅", "❌"),
+		"❌",
+		"❌ (Scaled object is based on deployment's name)",
+		"✅",
 	}})
 	t.SetStyle(table.StyleColoredBlackOnYellowWhite)
 	t.Render()
