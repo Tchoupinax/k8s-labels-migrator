@@ -70,3 +70,16 @@ func ArrayContains(s []string, e string) bool {
 	}
 	return false
 }
+
+func IsMatchSelectorsInclude(
+	setMap map[string]string,
+	subsetMap map[string]string,
+) bool {
+	for k := range subsetMap {
+		if setMap[k] != subsetMap[k] {
+			return false
+		}
+	}
+
+	return true
+}

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	keda "github.com/Tchoupinax/k8s-labels-migrator/resources"
+	keda "github.com/Tchoupinax/k8s-labels-migrator/resources/keda"
 	utils "github.com/Tchoupinax/k8s-labels-migrator/utils"
 	istio "istio.io/client-go/pkg/clientset/versioned"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

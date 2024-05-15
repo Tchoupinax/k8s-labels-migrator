@@ -6,11 +6,14 @@ import (
 	"os"
 	"strings"
 
+	resource "github.com/Tchoupinax/k8s-labels-migrator/resources"
+	authorizationPolicy "github.com/Tchoupinax/k8s-labels-migrator/resources/istio"
+	keda "github.com/Tchoupinax/k8s-labels-migrator/resources/keda"
+	"github.com/Tchoupinax/k8s-labels-migrator/summary/webapp"
 	utils "github.com/Tchoupinax/k8s-labels-migrator/utils"
 	table "github.com/jedib0t/go-pretty/v6/table"
 	istio "istio.io/client-go/pkg/clientset/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 )
@@ -49,65 +52,81 @@ func resourcesAnalyze(
 ) {
 	deployment, _ := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
 	service, _ := clientset.CoreV1().Services(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
-	destinationRule, _ := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
-	crdGVR := schema.GroupVersionResource{
-		Group:    "keda.sh",
-		Version:  "v1alpha1",
-		Resource: "scaledobjects",
-	}
-	kedaScaledObject, _ := crdClient.Resource(crdGVR).Namespace(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
 
-	deploymentSelectorLabels := deployment.Spec.Template.ObjectMeta.Labels
-	serviceSelectorLabels := service.Spec.Selector
-	destinationRuleSelectorLabels := destinationRule.Spec.Subsets[0].Labels
+	var resources []resource.Resource
+	resources = append(resources, resource.Resource{
+		Kind:       "Deployment",
+		ApiVersion: "apps/v1",
+		Name:       deploymentName,
+		Selectors:  deployment.ObjectMeta.Labels,
+		Category:   "Native",
+	})
+	resources = append(resources, resource.Resource{
+		Kind:       "Service",
+		ApiVersion: "v1",
+		Name:       service.Name,
+		Selectors:  service.Spec.Selector,
+		Category:   "Native",
+	})
+
+	matchingLabels := deployment.Spec.Template.ObjectMeta.Labels
+
+	// Istio Authorization Policies
+	authorizationPolicies := authorizationPolicy.IstioAuthorizationPolicyResourceAnalyze(
+		istioClient,
+		namespace,
+		matchingLabels,
+	)
+	for _, a := range authorizationPolicies {
+		resources = append(resources, a)
+	}
+	// Destination rules
+	destinationRules := authorizationPolicy.IstiDestinationRuleResourceAnalyze(
+		istioClient,
+		namespace,
+		matchingLabels,
+	)
+	for _, a := range destinationRules {
+		resources = append(resources, a)
+	}
+	// Keda — ScaledObject
+	scaledobjects := keda.KedaScaledObjectResourceAnalyze(
+		crdClient,
+		namespace,
+		deploymentName,
+	)
+	for _, a := range scaledobjects {
+		resources = append(resources, a)
+	}
 
 	fmt.Println()
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"Type", "Name", "Detected", "labels count", "labels", "valid"})
-	t.AppendRows([]table.Row{{
-		"<K8S>   Deployment",
-		utils.If(deployment.Name != "", deployment.Name, "—"),
-		utils.If(deployment != nil, "✅", "❌"),
-		len(deploymentSelectorLabels),
-		strings.Join(utils.MapToArray(deploymentSelectorLabels), "\n"),
-		utils.If(len(deploymentSelectorLabels) == 1 && deploymentSelectorLabels[changingLabelKey] != "", "❌", "✅"),
-	}})
-	t.AppendRows([]table.Row{{
-		"<K8S>   Service",
-		utils.If(service.Name != "", service.Name, "—"),
-		utils.If(service.Name != "", "✅", "❌"),
-		len(serviceSelectorLabels),
-		strings.Join(utils.MapToArray(serviceSelectorLabels), "\n"),
-		utils.If(len(serviceSelectorLabels) == 1 && serviceSelectorLabels[changingLabelKey] != "", "❌", "✅"),
-	}})
-	t.AppendRows([]table.Row{{
-		"<Istio> DestinationRule",
-		utils.If(service.Name != "", destinationRule.Name, "—"),
-		utils.If(service.Name != "", "✅", "❌"),
-		len(destinationRuleSelectorLabels),
-		strings.Join(utils.MapToArray(destinationRuleSelectorLabels), "\n"),
-		utils.If(len(destinationRuleSelectorLabels) == 1 && destinationRuleSelectorLabels[changingLabelKey] != "", "❌", "✅"),
-	}})
-	t.AppendRows([]table.Row{{
-		"<Keda>  ScaledObject",
-		utils.If(service.Name != "", kedaScaledObject.Object["metadata"].(map[string]interface{})["name"], "—"),
-		utils.If(kedaScaledObject != nil, "✅", "❌"),
-		"❌",
-		"❌ (Scaled object is based on deployment's name)",
-		"✅",
-	}})
+	for _, resource := range resources {
+		t.AppendRows([]table.Row{{
+			resource.Kind,
+			resource.Name,
+			"✅",
+			len(resource.Selectors),
+			strings.Join(utils.MapToArray(resource.Selectors), "\n"),
+			utils.If(len(resource.Selectors) == 1 && resource.Selectors[changingLabelKey] != "", "❌", "✅"),
+		}})
+	}
+
 	t.SetStyle(table.StyleColoredBlackOnYellowWhite)
 	t.Render()
 	fmt.Println()
 
-	if len(deploymentSelectorLabels) == 1 && deploymentSelectorLabels[changingLabelKey] != "" {
+	if len(matchingLabels) == 1 && matchingLabels[changingLabelKey] != "" {
 		utils.LogError(fmt.Sprintf("The label \"%s\" can not be edited because it's the only one in the matching set for the deployment", changingLabelKey))
 		os.Exit(1)
 	}
 
-	if len(serviceSelectorLabels) == 1 && serviceSelectorLabels[changingLabelKey] != "" {
+	if len(matchingLabels) == 1 && matchingLabels[changingLabelKey] != "" {
 		utils.LogError(fmt.Sprintf("The label \"%s\" can not be edited because it's the only one in the matching set for the service", changingLabelKey))
 		os.Exit(1)
 	}
+
+	webapp.StartWebServer(resources)
 }
