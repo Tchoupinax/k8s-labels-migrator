@@ -1,12 +1,12 @@
 package webapp
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"text/template"
 
 	resource "github.com/Tchoupinax/k8s-labels-migrator/resources"
+	utils "github.com/Tchoupinax/k8s-labels-migrator/utils"
 	"github.com/thedevsaddam/renderer"
 )
 
@@ -26,7 +26,9 @@ func filter[T any](array []T, test func(T) bool) (ret []T) {
 }
 
 func StartWebServer(
+	deploymentName string,
 	resources []resource.Resource,
+	podLabels map[string]string,
 ) {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		tpls := []string{"summary/webapp/views/summary.html"}
@@ -35,19 +37,26 @@ func StartWebServer(
 		})
 
 		data := struct {
-			NativeResources []resource.Resource
-			IstioResources  []resource.Resource
-			KedaResources   []resource.Resource
+			DeploymentName      string
+			IstioResources      []resource.Resource
+			IstioResourcesFound bool
+			KedaResources       []resource.Resource
+			KedaResourcesFound  bool
+			NativeResources     []resource.Resource
+			PodLabels           map[string]string
 		}{
-			NativeResources: filter(resources, func(r resource.Resource) bool { return r.Category == "Native" }),
-			IstioResources:  filter(resources, func(r resource.Resource) bool { return r.Category == "Istio" }),
-			KedaResources:   filter(resources, func(r resource.Resource) bool { return r.Category == "Keda" }),
+			DeploymentName:      deploymentName,
+			IstioResources:      filter(resources, func(r resource.Resource) bool { return r.Category == "Istio" }),
+			IstioResourcesFound: len(filter(resources, func(r resource.Resource) bool { return r.Category == "Istio" })) > 0,
+			KedaResources:       filter(resources, func(r resource.Resource) bool { return r.Category == "Keda" }),
+			KedaResourcesFound:  len(filter(resources, func(r resource.Resource) bool { return r.Category == "Keda" })) > 0,
+			NativeResources:     filter(resources, func(r resource.Resource) bool { return r.Category == "Native" }),
+			PodLabels:           podLabels,
 		}
 		ViewRenderer.Template(w, http.StatusOK, tpls, data)
 	})
 
-	fmt.Printf("Starting server at port 8080\n")
+	utils.LogInfo("View resumed here: http://localhost:8080")
+	utils.OpenURL("http://localhost:8080")
 	go http.ListenAndServe(":8080", nil)
-
-	fmt.Println("start server")
 }

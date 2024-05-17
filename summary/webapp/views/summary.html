@@ -1,81 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <title>k8s labels migrator</title>
+  <title>{{ .DeploymentName }} | k8s labels migrator</title>
 </head>
+
 <body class="flex justify-center p-6">
-  <div class="flex-col w-full xl:w-1/2">
-    <h1 class="text-4xl">Migration summary</h1>
+  <div class="flex-col items-center justify-center w-full">
+    <div class="flex justify-center">
+      <pre class="">
+ _       ___            _           _              _                       _                          _
+| | __  ( _ )   ___    | |   __ _  | |__     ___  | |  ___     _ __ ___   (_)   __ _   _ __    __ _  | |_    ___    _ __
+| |/ /  / _ \  / __|   | |  / _` | | '_ \   / _ \ | | / __|   | '_ ` _ \  | |  / _` | | '__|  / _` | | __|  / _ \  | '__|
+|   <  | (_) | \__ \   | | | (_| | | |_) | |  __/ | | \__ \   | | | | | | | | | (_| | | |    | (_| | | |_  | (_) | | |
+|_|\_\  \___/  |___/   |_|  \__,_| |_.__/   \___| |_| |___/   |_| |_| |_| |_|  \__, | |_|     \__,_|  \__|  \___/  |_|
+                                                                                |___/
+      </pre>
+    </div>
 
-    <h1 class="mt-8 mb-2 text-2xl underline">Native</h1>
-    <table class="table-auto">
-      <thead>
-        <tr>
-          <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">ApiVersion</th>
-          <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Kind</th>
-          <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Name</th>
-        </tr>
-      </thead>
-      
+    <div class="flex justify-center">
+      <div class="flex-col w-full p-4">
+        <div class="flex-col justify-center">
 
-      <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-        {{ range .NativeResources }}
-        <tr>
-          <td class="px-2 py-1 text-xs text-center text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">{{ .ApiVersion }}</td>
-          <td class="px-2 py-1 text-xs text-center text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">{{ .Kind }}</td>
-          <td class="px-2 py-1 text-xs text-left text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">{{ .Name }}</td>
-        </tr>
-        {{ end }}
-      </tbody>
-    </table>
+          <h1 class="text-4xl">{{ .DeploymentName }}</h1>
+        </div>
 
-    <h1 class="mt-8 mb-2 text-2xl underline">Keda</h1>
-    <table class="table-auto">
-      <thead>
-        <tr>
-          <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">ApiVersion</th>
-          <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Kind</th>
-          <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Name</th>
-        </tr>
-      </thead>
-      
+        <div class="w-auto py-2 my-4 bg-cyan-100">
+          <h2 class="mb-4 text-3xl">Pod labels</h2>
+          
+          {{ range $key, $value := .PodLabels }}
+          <p><strong>{{ $key }}</strong>: {{ $value }}</p>
+          {{ end }}
+        </div>
 
-      <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-        {{ range .KedaResources }}
-        <tr>
-          <td class="px-2 py-1 text-xs text-center text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">{{ .ApiVersion }}</td>
-          <td class="px-2 py-1 text-xs text-center text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">{{ .Kind }}</td>
-          <td class="px-2 py-1 text-xs text-left text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">{{ .Name }}</td>
-        </tr>
-        {{ end }}
-      </tbody>
-    </table>
+        <h1 class="mt-8 mb-2 text-2xl underline">Native</h1>
+        <table class="table-auto">
+          <thead>
+            <tr>
+              <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">ApiVersion</th>
+              <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Kind</th>
+              <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Name</th>
+              <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Labels</th>
+              <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Selectors</th>
+            </tr>
+          </thead>
 
-    <h1 class="mt-8 mb-2 text-2xl underline">Istio</h1>
-    <table class="table-auto">
-      <thead>
-        <tr>
-          <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">ApiVersion</th>
-          <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Kind</th>
-          <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Name</th>
-        </tr>
-      </thead>
-      
 
-      <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-        {{ range .IstioResources }}
-        <tr>
-          <td class="px-2 py-1 text-xs text-center text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">{{ .ApiVersion }}</td>
-          <td class="px-2 py-1 text-xs text-center text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">{{ .Kind }}</td>
-          <td class="px-2 py-1 text-xs text-left text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">{{ .Name }}</td>
-        </tr>
-        {{ end }}
-      </tbody>
-    </table>
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            {{ range .NativeResources }}
+            <tr>
+              <td
+                class="px-2 py-1 text-xs text-center text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">
+                {{ .ApiVersion }}
+              </td>
+              <td
+                class="px-2 py-1 text-xs text-center text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">
+                {{ .Kind }}
+              </td>
+              <td class="px-2 py-1 text-xs text-left text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">
+                {{ .Name }}
+              </td>
+              <td class="px-2 py-1 text-xs text-left text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">
+                {{ range $key, $value := .Labels }}
+                <p><strong>{{ $key }}</strong>: {{ $value }}</p>
+                {{ end }}
+              </td>
+              <td class="px-2 py-1 text-xs text-left text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">
+                {{ range $key, $value := .Selectors }}
+                <p><strong>{{ $key }}</strong>: {{ $value }}</p>
+                {{ end }}
+              </td>
+            </tr>
+            {{ end }}
+          </tbody>
+        </table>
+
+        {{if .KedaResourcesFound }}
+        <h1 class="mt-8 mb-2 text-2xl underline">Keda</h1>
+        <table class="table-auto">
+          <thead>
+            <tr>
+              <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">ApiVersion</th>
+              <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Kind</th>
+              <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Name</th>
+              <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Labels</th>
+              <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Selectors</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            {{ range .KedaResources }}
+            <tr>
+              <td
+                class="px-2 py-1 text-xs text-center text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">
+                {{ .ApiVersion }}
+              </td>
+              <td
+                class="px-2 py-1 text-xs text-center text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">
+                {{ .Kind }}
+              </td>
+              <td class="px-2 py-1 text-xs text-left text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">
+                {{ .Name }}
+              </td>
+              <td class="px-2 py-1 text-xs text-left text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">
+                {{ range $key, $value := .Labels }}
+                <p><strong>{{ $key }}</strong>: {{ $value }}</p>
+                {{ end }}
+              </td>
+              <td class="px-2 py-1 text-xs text-left text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">
+                {{ range $key, $value := .Selectors }}
+                <p><strong>{{ $key }}</strong>: {{ $value }}</p>
+                {{ end }}
+              </td>
+            </tr>
+            {{ end }}
+          </tbody>
+        </table>
+        {{end}}
+
+        {{if .IstioResourcesFound }}
+        <h1 class="mt-8 mb-2 text-2xl underline">Istio</h1>
+        <table class="table-auto">
+          <thead>
+            <tr>
+              <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">ApiVersion</th>
+              <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Kind</th>
+              <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Name</th>
+              <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Labels</th>
+              <th class="px-2 py-1 text-xs font-medium text-gray-500 uppercase text-start">Selectors</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            {{ range .IstioResources }}
+            <tr>
+              <td
+                class="px-2 py-1 text-xs text-center text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">
+                {{ .ApiVersion }}
+              </td>
+              <td
+                class="px-2 py-1 text-xs text-center text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">
+                {{ .Kind }}
+              </td>
+              <td class="px-2 py-1 text-xs text-left text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">
+                {{ .Name }}
+              </td>
+              <td class="px-2 py-1 text-xs text-left text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">
+                {{ range $key, $value := .Labels }}
+                <p><strong>{{ $key }}</strong>: {{ $value }}</p>
+                {{ end }}
+              </td>
+              <td class="px-2 py-1 text-xs text-left text-gray-800 md:text-sm xl:px-4 whitespace-nowrap dark:text-gray-200">
+                {{ range $key, $value := .Selectors }}
+                <p><strong>{{ $key }}</strong>: {{ $value }}</p>
+                {{ end }}
+              </td>
+            </tr>
+            {{ end }}
+          </tbody>
+        </table>
+        {{end}}
+      </div>
+    </div>
   </div>
 </body>
+
 </html>

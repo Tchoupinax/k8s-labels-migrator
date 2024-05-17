@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
+	"strconv"
+	"time"
 
 	resource "github.com/Tchoupinax/k8s-labels-migrator/resources"
 	authorizationPolicy "github.com/Tchoupinax/k8s-labels-migrator/resources/istio"
 	keda "github.com/Tchoupinax/k8s-labels-migrator/resources/keda"
+	"github.com/Tchoupinax/k8s-labels-migrator/resources/native"
 	"github.com/Tchoupinax/k8s-labels-migrator/summary/webapp"
 	utils "github.com/Tchoupinax/k8s-labels-migrator/utils"
 	table "github.com/jedib0t/go-pretty/v6/table"
@@ -26,6 +28,7 @@ func displaySummary(
 	goalOfOperationIsToRemoveLabel bool,
 ) {
 	fmt.Println()
+
 	t := table.NewWriter()
 	t.AppendHeader(table.Row{"Parameter", "Value"})
 	t.AppendRows([]table.Row{{"Deployment name", deploymentName}})
@@ -50,41 +53,58 @@ func resourcesAnalyze(
 	deploymentName string,
 	changingLabelKey string,
 ) {
+	startTime := time.Now()
+
 	deployment, _ := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
-	service, _ := clientset.CoreV1().Services(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
+	if deployment.ObjectMeta.Name == "" {
+		utils.LogError(fmt.Sprintf("The deployment \"%s\" was not found in the namespace \"%s\"", deploymentName, namespace))
+		os.Exit(1)
+	}
 
 	var resources []resource.Resource
 	resources = append(resources, resource.Resource{
 		Kind:       "Deployment",
 		ApiVersion: "apps/v1",
 		Name:       deploymentName,
-		Selectors:  deployment.ObjectMeta.Labels,
-		Category:   "Native",
-	})
-	resources = append(resources, resource.Resource{
-		Kind:       "Service",
-		ApiVersion: "v1",
-		Name:       service.Name,
-		Selectors:  service.Spec.Selector,
+		Labels:     deployment.ObjectMeta.Labels,
+		Selectors:  map[string]string{},
 		Category:   "Native",
 	})
 
-	matchingLabels := deployment.Spec.Template.ObjectMeta.Labels
+	podLabels := deployment.Spec.Template.ObjectMeta.Labels
 
+	// Native Services
+	services := native.NativeServiceResourceAnalyze(
+		clientset,
+		namespace,
+		podLabels,
+	)
+	for _, a := range services {
+		resources = append(resources, a)
+	}
+	// Native HPA
+	hpa := native.NativeHPAResourceAnalyze(
+		clientset,
+		namespace,
+		deploymentName,
+	)
+	for _, a := range hpa {
+		resources = append(resources, a)
+	}
 	// Istio Authorization Policies
 	authorizationPolicies := authorizationPolicy.IstioAuthorizationPolicyResourceAnalyze(
 		istioClient,
 		namespace,
-		matchingLabels,
+		podLabels,
 	)
 	for _, a := range authorizationPolicies {
 		resources = append(resources, a)
 	}
 	// Destination rules
-	destinationRules := authorizationPolicy.IstiDestinationRuleResourceAnalyze(
+	destinationRules := authorizationPolicy.IstioDestinationRuleResourceAnalyze(
 		istioClient,
 		namespace,
-		matchingLabels,
+		podLabels,
 	)
 	for _, a := range destinationRules {
 		resources = append(resources, a)
@@ -99,34 +119,21 @@ func resourcesAnalyze(
 		resources = append(resources, a)
 	}
 
-	fmt.Println()
-	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"Type", "Name", "Detected", "labels count", "labels", "valid"})
-	for _, resource := range resources {
-		t.AppendRows([]table.Row{{
-			resource.Kind,
-			resource.Name,
-			"✅",
-			len(resource.Selectors),
-			strings.Join(utils.MapToArray(resource.Selectors), "\n"),
-			utils.If(len(resource.Selectors) == 1 && resource.Selectors[changingLabelKey] != "", "❌", "✅"),
-		}})
-	}
-
-	t.SetStyle(table.StyleColoredBlackOnYellowWhite)
-	t.Render()
-	fmt.Println()
-
-	if len(matchingLabels) == 1 && matchingLabels[changingLabelKey] != "" {
+	if len(podLabels) == 1 && podLabels[changingLabelKey] != "" {
 		utils.LogError(fmt.Sprintf("The label \"%s\" can not be edited because it's the only one in the matching set for the deployment", changingLabelKey))
 		os.Exit(1)
 	}
 
-	if len(matchingLabels) == 1 && matchingLabels[changingLabelKey] != "" {
+	if len(podLabels) == 1 && podLabels[changingLabelKey] != "" {
 		utils.LogError(fmt.Sprintf("The label \"%s\" can not be edited because it's the only one in the matching set for the service", changingLabelKey))
 		os.Exit(1)
 	}
 
-	webapp.StartWebServer(resources)
+	utils.LogSuccess("Resources analyzed (" + strconv.FormatFloat(time.Now().Sub(startTime).Seconds(), 'f', 2, 64) + "s)")
+
+	webapp.StartWebServer(
+		deploymentName,
+		resources,
+		podLabels,
+	)
 }

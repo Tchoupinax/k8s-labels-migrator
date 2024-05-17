@@ -15,24 +15,21 @@ func IstioAuthorizationPolicyResourceAnalyze(
 	matchingLabels map[string]string,
 ) []resource.Resource {
 	authorizationPolicies, _ := istioClient.SecurityV1beta1().AuthorizationPolicies(namespace).List(context.TODO(), v1.ListOptions{})
-	matchingAuthorizationPolicies := []string{}
 
+	var final []resource.Resource
 	for _, item := range authorizationPolicies.Items {
 		if item.Spec.Selector != nil {
 			if utils.IsMatchSelectorsInclude(matchingLabels, item.Spec.Selector.MatchLabels) {
-				matchingAuthorizationPolicies = append(matchingAuthorizationPolicies, item.GetName())
+				final = append(final, resource.Resource{
+					ApiVersion: "security.istio.io/v1beta1",
+					Category:   "Istio",
+					Kind:       "AuthorizationPolicy",
+					Labels:     item.ObjectMeta.Labels,
+					Selectors:  item.Spec.Selector.MatchLabels,
+					Name:       item.GetName(),
+				})
 			}
 		}
-	}
-
-	var final []resource.Resource
-	for _, item := range matchingAuthorizationPolicies {
-		final = append(final, resource.Resource{
-			Kind:       "AuthorizationPolicy",
-			ApiVersion: "security.istio.io/v1beta1",
-			Name:       item,
-			Category:   "Istio",
-		})
 	}
 
 	return final

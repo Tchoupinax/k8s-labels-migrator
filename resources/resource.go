@@ -4,8 +4,9 @@ type Resource struct {
 	ApiVersion string
 	Category   string
 	Kind       string
-	Selectors  map[string]string
+	Labels     map[string]string
 	Name       string
+	Selectors  map[string]string
 }
 
 type Event struct {

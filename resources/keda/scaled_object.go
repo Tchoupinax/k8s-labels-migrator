@@ -24,27 +24,44 @@ func KedaScaledObjectResourceAnalyze(
 		Resource: "scaledobjects",
 	}
 	kedaScaledObject, _ := crdClient.Resource(crdGVR).Namespace(namespace).List(context.TODO(), v1.ListOptions{})
-	matchingScaledObjects := []string{}
 
+	var final []resource.Resource
 	for _, item := range kedaScaledObject.Items {
 		if item.Object["metadata"].(map[string]interface{})["name"] != nil {
 			if item.Object["metadata"].(map[string]interface{})["name"] == matchingDeploymentName {
-				matchingScaledObjects = append(matchingScaledObjects, item.GetName())
+				final = append(final, resource.Resource{
+					ApiVersion: "keda.sh/v1alpha1",
+					Category:   "Keda",
+					Kind:       "ScaledObject",
+					Labels:     transformMap(item.Object["metadata"].(map[string]interface{})["labels"].(map[string]interface{})),
+					Selectors:  transformMap(item.Object["spec"].(map[string]interface{})["scaleTargetRef"].(map[string]interface{})),
+					Name:       item.GetName(),
+				})
 			}
 		}
 	}
 
-	var final []resource.Resource
-	for _, item := range matchingScaledObjects {
-		final = append(final, resource.Resource{
-			Kind:       "ScaledObject",
-			ApiVersion: "keda.sh/v1alpha1",
-			Name:       item,
-			Category:   "Keda",
-		})
-	}
-
 	return final
+}
+
+// transformMap converts a map[string]interface{} to map[string]string
+func transformMap(input map[string]interface{}) map[string]string {
+	output := make(map[string]string)
+	for key, value := range input {
+		switch v := value.(type) {
+		case string:
+			output[key] = v
+		case int:
+			output[key] = fmt.Sprintf("%d", v)
+		case float64:
+			output[key] = fmt.Sprintf("%f", v)
+		case bool:
+			output[key] = fmt.Sprintf("%t", v)
+		default:
+			output[key] = fmt.Sprintf("%v", v)
+		}
+	}
+	return output
 }
 
 // https://keda.sh/docs/2.13/concepts/scaling-deployments
