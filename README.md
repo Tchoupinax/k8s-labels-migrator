@@ -1,5 +1,7 @@
 # kubernetes-labels-migrator
 
+![]
+
 ## Installation
 
 ### MacOS
