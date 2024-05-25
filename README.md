@@ -1,3 +1,5 @@
+![Screenshot of a terminal with all the execution](.github/docs/logo.png "CLI demo")
+
 # kubernetes-labels-migrator
 
 ## Installation
