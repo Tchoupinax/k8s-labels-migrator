@@ -1,6 +1,7 @@
 package webapp
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"text/template"
@@ -53,10 +54,20 @@ func StartWebServer(
 			NativeResources:     filter(resources, func(r resource.Resource) bool { return r.Category == "Native" }),
 			PodLabels:           podLabels,
 		}
-		ViewRenderer.Template(w, http.StatusOK, tpls, data)
+		err := ViewRenderer.Template(w, http.StatusOK, tpls, data)
+		utils.Check(err)
 	})
 
 	utils.LogInfo("View resumed here: http://localhost:8080")
-	utils.OpenURL("http://localhost:8080")
-	go http.ListenAndServe(":8080", nil)
+	err := utils.OpenURL("http://localhost:8080")
+	utils.Check(err)
+
+	httpServerError := make(chan error, 1)
+	go func() {
+		httpServerError <- http.ListenAndServe(":8080", nil)
+	}()
+
+	if err := <-httpServerError; err != nil {
+		fmt.Println(err)
+	}
 }
