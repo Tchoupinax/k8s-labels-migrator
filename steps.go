@@ -59,10 +59,14 @@ func MigrationWorkflow(
 
 	utils.LogInfo("2.1 Updating Istio destination rules")
 	var temporalDestinationRule = currentDestinationRule
-	delete(temporalDestinationRule.Spec.Subsets[0].Labels, changingLabelKey)
-	_, err = istioClient.NetworkingV1alpha3().DestinationRules(namespace).Update(context.TODO(), temporalDestinationRule, metav1.UpdateOptions{})
-	utils.Check(err)
-	utils.LogSuccess("2.1 Istio destination rules updated")
+	if len(temporalDestinationRule.Spec.Subsets) > 0 {
+		delete(temporalDestinationRule.Spec.Subsets[0].Labels, changingLabelKey)
+		_, err = istioClient.NetworkingV1alpha3().DestinationRules(namespace).Update(context.TODO(), temporalDestinationRule, metav1.UpdateOptions{})
+		utils.Check(err)
+		utils.LogSuccess("2.1 Istio destination rules updated")
+	} else {
+		utils.LogSuccess("2.1 No Istio destination rules found")
+	}
 
 	utils.LogInfo("2.2 Keda")
 	keda.PauseScaledObject(crdClient, clientset, deploymentName, namespace)
@@ -178,21 +182,29 @@ func AddLabelToIstioDestinatonRulesSelector(
 	utils.LogInfo("====== Additionnal step ====================================")
 	utils.LogInfo("9. Add the label as a selector in istio destination rules...")
 	currentDestinationRule, err := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Get(context.TODO(), applicationName, v1.GetOptions{})
-	utils.Check(err)
 
-	var futureDestinationRule = currentDestinationRule
-	if removeLabel {
-		// Update the value of the label
-		delete(futureDestinationRule.Spec.Subsets[0].Labels, changingLabelKey)
+	if strings.HasSuffix(err.Error(), "not found") {
+		utils.LogSuccess("9. Not Istio rules configured")
+		utils.LogInfo("============================================================")
 	} else {
-		futureDestinationRule.Spec.Subsets[0].Labels[changingLabelKey] = changingLabelValue
-		// If the string is empty, remove the label (see deployment)
+		fmt.Println(currentDestinationRule)
+		fmt.Println(err)
+		utils.Check(err)
+
+		var futureDestinationRule = currentDestinationRule
+		if removeLabel {
+			// Update the value of the label
+			delete(futureDestinationRule.Spec.Subsets[0].Labels, changingLabelKey)
+		} else {
+			futureDestinationRule.Spec.Subsets[0].Labels[changingLabelKey] = changingLabelValue
+			// If the string is empty, remove the label (see deployment)
+		}
+
+		// Update the service in the cluster
+		_, updateDestinationRuleError := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Update(context.TODO(), futureDestinationRule, metav1.UpdateOptions{})
+		utils.Check(updateDestinationRuleError)
+
+		utils.LogSuccess("9. Istio destination rules configured")
+		utils.LogInfo("============================================================")
 	}
-
-	// Update the service in the cluster
-	_, updateDestinationRuleError := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Update(context.TODO(), futureDestinationRule, metav1.UpdateOptions{})
-	utils.Check(updateDestinationRuleError)
-
-	utils.LogSuccess("9. Istio destination rules configured")
-	utils.LogInfo("============================================================")
 }
