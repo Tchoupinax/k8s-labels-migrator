@@ -79,45 +79,44 @@ func resourcesAnalyze(
 		namespace,
 		podLabels,
 	)
-	for _, a := range services {
-		resources = append(resources, a)
-	}
+
+	resources = append(resources, services...)
+
 	// Native HPA
 	hpa := native.NativeHPAResourceAnalyze(
 		clientset,
 		namespace,
 		deploymentName,
 	)
-	for _, a := range hpa {
-		resources = append(resources, a)
-	}
+
+	resources = append(resources, hpa...)
+
 	// Istio Authorization Policies
 	authorizationPolicies := authorizationPolicy.IstioAuthorizationPolicyResourceAnalyze(
 		istioClient,
 		namespace,
 		podLabels,
 	)
-	for _, a := range authorizationPolicies {
-		resources = append(resources, a)
-	}
+
+	resources = append(resources, authorizationPolicies...)
+
 	// Destination rules
 	destinationRules := authorizationPolicy.IstioDestinationRuleResourceAnalyze(
 		istioClient,
 		namespace,
 		podLabels,
 	)
-	for _, a := range destinationRules {
-		resources = append(resources, a)
-	}
+
+	resources = append(resources, destinationRules...)
+
 	// Keda — ScaledObject
 	scaledobjects := keda.KedaScaledObjectResourceAnalyze(
 		crdClient,
 		namespace,
 		deploymentName,
 	)
-	for _, a := range scaledobjects {
-		resources = append(resources, a)
-	}
+
+	resources = append(resources, scaledobjects...)
 
 	if len(podLabels) == 1 && podLabels[changingLabelKey] != "" {
 		utils.LogError(fmt.Sprintf("The label \"%s\" can not be edited because it's the only one in the matching set for the deployment", changingLabelKey))
@@ -129,7 +128,7 @@ func resourcesAnalyze(
 		os.Exit(1)
 	}
 
-	utils.LogSuccess("Resources analyzed (" + strconv.FormatFloat(time.Now().Sub(startTime).Seconds(), 'f', 2, 64) + "s)")
+	utils.LogSuccess("Resources analyzed (" + strconv.FormatFloat(time.Since(startTime).Seconds(), 'f', 2, 64) + "s)")
 
 	webapp.StartWebServer(
 		deploymentName,
