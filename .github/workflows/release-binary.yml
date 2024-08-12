@@ -30,4 +30,4 @@ jobs:
           version: v2.1.0
           args: release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TOKEN_GITHUB: ${{ secrets.TOKEN_GITHUB }}
