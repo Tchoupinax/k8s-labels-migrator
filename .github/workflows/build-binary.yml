@@ -1,9 +1,8 @@
-name: Release binary
+name: Build binary
 
 on:
-  push:
-    tags:
-      - "*"
+  pull_request:
+    branches:
 
 jobs:
   build-binary:
@@ -28,6 +27,6 @@ jobs:
         uses: goreleaser/goreleaser-action@v6
         with:
           version: v2.1.0
-          args: release
+          args: build --snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,16 +1,16 @@
-name: Releases publication
+name: Releases binary
 
 on:
   push:
     tags:
-      - '*'
+      - "*"
 
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -20,23 +20,14 @@ jobs:
           echo "Using Go version ${{ steps.vars.outputs.go_version }}"
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ steps.vars.outputs.go_version }}
 
       - name: Compile the source
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v6
         with:
-          version: latest
-          args: build --rm-dist --skip-validate
+          version: v2.1.0
+          args: release
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
-        with:
-          distribution: goreleaser
-          version: latest
-          args: release --rm-dist
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
