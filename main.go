@@ -65,6 +65,18 @@ func main() {
 		os.Exit(1)
 	}
 
+	labelKeyErr := utils.CheckLabelKey(labelToChangeKey)
+	if labelKeyErr != nil {
+		utils.LogError(labelKeyErr.Error())
+		os.Exit(1)
+	}
+
+	labelValueErr := utils.CheckLabelValue(labelToChangeValue)
+	if labelValueErr != nil {
+		utils.LogError(labelValueErr.Error())
+		os.Exit(1)
+	}
+
 	fmt.Print("\033[H\033[2J")
 	ascii := figlet4go.NewAsciiRender()
 	renderStr, _ := ascii.Render("k8s labels migrator")
