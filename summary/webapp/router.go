@@ -62,12 +62,10 @@ func StartWebServer(
 	err := utils.OpenURL("http://localhost:8080")
 	utils.Check(err)
 
-	httpServerError := make(chan error, 1)
 	go func() {
-		httpServerError <- http.ListenAndServe(":8080", nil)
+		httpServerError := http.ListenAndServe(":8080", nil)
+		if err := httpServerError; err != nil {
+			fmt.Println(err)
+		}
 	}()
-
-	if err := <-httpServerError; err != nil {
-		fmt.Println(err)
-	}
 }
