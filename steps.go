@@ -183,14 +183,15 @@ func AddLabelToIstioDestinatonRulesSelector(
 	utils.LogInfo("9. Add the label as a selector in istio destination rules...")
 	currentDestinationRule, err := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Get(context.TODO(), applicationName, v1.GetOptions{})
 
-	if strings.HasSuffix(err.Error(), "not found") {
-		utils.LogSuccess("9. Not Istio rules configured")
-		utils.LogInfo("============================================================")
+	if err != nil {
+		if strings.HasSuffix(err.Error(), "not found") {
+			utils.LogSuccess("9. Not Istio rules configured")
+			utils.LogInfo("============================================================")
+		} else {
+			fmt.Println(err)
+			utils.Check(err)
+		}
 	} else {
-		fmt.Println(currentDestinationRule)
-		fmt.Println(err)
-		utils.Check(err)
-
 		var futureDestinationRule = currentDestinationRule
 		if removeLabel {
 			// Update the value of the label
