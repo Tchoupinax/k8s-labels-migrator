@@ -9,7 +9,7 @@ import (
 )
 
 const Version string = "0.1.5"
-const BuildDate string = "2024-09-05"
+const BuildDate string = "2024-09-24"
 
 func cliCommandDisplayHelp(args []string) {
 	displayVersion := utils.StringInSlice("-v", args[1:]) || utils.StringInSlice("--version", args[1:])
