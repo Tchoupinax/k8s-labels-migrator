@@ -3,5 +3,20 @@
   "extends": [
     "config:recommended",
     "group:allNonMajor"
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  },
+  "labels": ["renovate"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true
+    }
   ]
 }
