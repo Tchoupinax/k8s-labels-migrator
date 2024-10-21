@@ -4,7 +4,7 @@ go 1.22.2
 
 require (
 	github.com/fatih/color v1.17.0
-	github.com/jedib0t/go-pretty/v6 v6.6.0
+	github.com/jedib0t/go-pretty/v6 v6.6.1
 	github.com/mbndr/figlet4go v0.0.0-20190224160619-d6cef5b186ea
 	github.com/thedevsaddam/renderer v1.2.0
 	istio.io/client-go v1.23.2
