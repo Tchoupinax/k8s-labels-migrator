@@ -1,6 +1,7 @@
 package webapp
 
 import (
+	_ "embed"
 	"fmt"
 	"net/http"
 	"strings"
@@ -12,6 +13,9 @@ import (
 )
 
 var ViewRenderer *renderer.Render
+
+//go:embed views/summary.html
+var summaryHTMLPage string
 
 func init() {
 	ViewRenderer = renderer.New()
@@ -32,7 +36,8 @@ func StartWebServer(
 	podLabels map[string]string,
 ) {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		tpls := []string{"summary/webapp/views/summary.html"}
+		tmpl, _ := template.New("index").Parse(summaryHTMLPage)
+
 		ViewRenderer.FuncMap(template.FuncMap{
 			"contains": strings.Contains,
 		})
@@ -54,8 +59,8 @@ func StartWebServer(
 			NativeResources:     filter(resources, func(r resource.Resource) bool { return r.Category == "Native" }),
 			PodLabels:           podLabels,
 		}
-		err := ViewRenderer.Template(w, http.StatusOK, tpls, data)
-		utils.Check(err)
+		templateError := tmpl.ExecuteTemplate(w, "index", data)
+		utils.Check(templateError)
 	})
 
 	utils.LogInfo("View resumed here: http://localhost:8080")
