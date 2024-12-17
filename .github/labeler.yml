@@ -1,0 +1,57 @@
+version: v1
+labels:
+  - label: "semver:major"
+    sync: true # remove label if match failed, default: false
+    matcher:
+      title: ".*BREAKING.*"
+
+  - label: "semver:minor"
+    sync: true # remove label if match failed, default: false
+    matcher:
+      title: "^feat(?!.*BREAKING).*"
+      files:
+        any: ["app/*"]
+        all: ["!app/config/**"]
+        count:
+          gte: 1
+          lte: 1000
+
+  - label: "semver:patch"
+    sync: true # remove label if match failed, default: false
+    matcher:
+      title: "^fix(?!.*BREAKING).*"
+
+  - label: "maintenance"
+    sync: true # remove label if match failed, default: false
+    matcher:
+      title: "^chore(?!.*BREAKING).*"
+      files:
+        any:
+          - "package.json"
+
+  - label: "CI/CD"
+    sync: true # remove label if match failed, default: false
+    matcher:
+      files:
+        any:
+          - ".github/**"
+
+  - label: "docs"
+    sync: true # remove label if match failed, default: false
+    matcher:
+      files:
+        any:
+          - "**/*.md"
+
+  - label: "manifest"
+    sync: true # remove label if match failed, default: false
+    matcher:
+      files:
+        any:
+          - "action.yml"
+
+checks:
+  - context: "Ready to merge"
+    description: "Disable merging when 'draft' label is set."
+    labels:
+      none: ["draft"]
