@@ -59,8 +59,8 @@ func MigrationWorkflow(
 
 	utils.LogInfo("2.1 Updating Istio destination rules")
 	var temporalDestinationRule = currentDestinationRule
-	if len(temporalDestinationRule.Spec.Subsets) > 0 {
-		delete(temporalDestinationRule.Spec.Subsets[0].Labels, changingLabelKey)
+	if len(temporalDestinationRule.Spec.GetSubsets()) > 0 {
+		delete(temporalDestinationRule.Spec.GetSubsets()[0].GetLabels(), changingLabelKey)
 		_, err = istioClient.NetworkingV1alpha3().DestinationRules(namespace).Update(context.TODO(), temporalDestinationRule, metav1.UpdateOptions{})
 		utils.Check(err)
 		utils.LogSuccess("2.1 Istio destination rules updated")
@@ -195,7 +195,7 @@ func AddLabelToIstioDestinatonRulesSelector(
 		var futureDestinationRule = currentDestinationRule
 		if removeLabel {
 			// Update the value of the label
-			delete(futureDestinationRule.Spec.Subsets[0].Labels, changingLabelKey)
+			delete(futureDestinationRule.Spec.GetSubsets()[0].GetLabels(), changingLabelKey)
 		} else {
 			futureDestinationRule.Spec.Subsets[0].Labels[changingLabelKey] = changingLabelValue
 			// If the string is empty, remove the label (see deployment)

@@ -18,14 +18,14 @@ func IstioAuthorizationPolicyResourceAnalyze(
 
 	var final []resource.Resource
 	for _, item := range authorizationPolicies.Items {
-		if item.Spec.Selector != nil {
-			if utils.IsMatchSelectorsInclude(matchingLabels, item.Spec.Selector.MatchLabels) {
+		if item.Spec.GetSelector() != nil {
+			if utils.IsMatchSelectorsInclude(matchingLabels, item.Spec.GetSelector().GetMatchLabels()) {
 				final = append(final, resource.Resource{
 					ApiVersion: "security.istio.io/v1beta1",
 					Category:   "Istio",
 					Kind:       "AuthorizationPolicy",
 					Labels:     item.ObjectMeta.Labels,
-					Selectors:  item.Spec.Selector.MatchLabels,
+					Selectors:  item.Spec.GetSelector().GetMatchLabels(),
 					Name:       item.GetName(),
 				})
 			}
