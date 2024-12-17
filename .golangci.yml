@@ -1,0 +1,82 @@
+linters-settings:
+  lll:
+    line-length: 200
+  gocyclo:
+    min-complexity: 20
+  revive:
+    rules:
+      - name: dot-imports
+        disabled: true
+        #arguments:
+        #  - allowedPackages:
+        #      - "github.com/onsi/ginkgo"
+        #      - "github.com/onsi/ginkgo/v2"
+        #      - "github.com/onsi/gomega"
+
+  depguard:
+    rules:
+      prevent_unmaintained_packages:
+        list-mode: lax # allow unless explicitely denied
+        files:
+          - $all
+          - "!$test"
+        allow:
+          - $gostd
+        deny:
+          - pkg: io/ioutil
+            desc: "replaced by io and os packages since Go 1.16: https://tip.golang.org/doc/go1.16#ioutil"
+
+linters:
+  enable:
+    # - funlen
+    # - gocritic
+    # - godox
+    # - golint
+    # - wsl
+    - bodyclose
+    - depguard
+    - dogsled
+    - dupl
+    - errcheck
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - goconst
+    - gocyclo
+    - gofmt
+    - goimports
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - lll
+    - misspell
+    - nakedret
+    - prealloc
+    - revive
+    - staticcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+  disable:
+    - noctx
+    - errorlint
+
+  disable-all: false
+  presets:
+    - bugs
+    - unused
+  fast: false
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+        - gochecknoglobals
+        - dupl
+  #include:
+  # - EXC0002

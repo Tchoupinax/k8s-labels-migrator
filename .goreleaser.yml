@@ -1,0 +1,7 @@
+version: 2
+
+project_name: kubernetes-labels-migrator
+
+builds:
+  - ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.FullCommit}} -X main.buildDate={{.Date}}
