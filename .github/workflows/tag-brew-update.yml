@@ -15,7 +15,7 @@ jobs:
       # https://github.com/mislav/bump-homebrew-formula-action?tab=readme-ov-file#action-inputs
       - uses: mislav/bump-homebrew-formula-action@v3
         with:
-          commit-message: "feat({z{formulaName}}): publish version {{version}} 🤖"
+          commit-message: "feat({{formulaName}}): publish version {{version}} 🤖"
           formula-path: kubernetes-labels-migrator.rb
           homebrew-tap: Tchoupinax/homebrew-brew
         env:
