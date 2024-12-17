@@ -19,13 +19,13 @@ func IstioDestinationRuleResourceAnalyze(
 	var final []resource.Resource
 	for _, item := range destinationRules.Items {
 		if item.Spec.Subsets[0].Labels != nil {
-			if utils.IsMatchSelectorsInclude(matchingLabels, item.Spec.Subsets[0].Labels) {
+			if utils.IsMatchSelectorsInclude(matchingLabels, item.Spec.GetSubsets()[0].GetLabels()) {
 				final = append(final, resource.Resource{
 					ApiVersion: "networking.istio.io/v1beta1",
 					Category:   "Istio",
 					Kind:       "DestinationRule",
 					Labels:     item.ObjectMeta.Labels,
-					Selectors:  item.Spec.Subsets[0].Labels,
+					Selectors:  item.Spec.GetSubsets()[0].GetLabels(),
 					Name:       item.GetName(),
 				})
 			}

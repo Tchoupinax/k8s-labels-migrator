@@ -8,8 +8,11 @@ import (
 	"github.com/fatih/color"
 )
 
-const Version string = "0.1.5"
-const BuildDate string = "2024-09-24"
+var (
+	version   string
+	buildDate string
+	commit    string
+)
 
 func cliCommandDisplayHelp(args []string) {
 	displayVersion := utils.StringInSlice("-v", args[1:]) || utils.StringInSlice("--version", args[1:])
@@ -21,8 +24,9 @@ func cliCommandDisplayHelp(args []string) {
 		fmt.Println()
 		fmt.Println(bold("⚡️ Kubernetes labels migrator"))
 		fmt.Println()
-		fmt.Println("build date: ", bold(BuildDate))
-		fmt.Println("version:         ", bold(Version))
+		fmt.Println("build date: ", bold(buildDate))
+		fmt.Println("version:    ", bold(version))
+		fmt.Println("commit:     ", bold(commit))
 		fmt.Println()
 		fmt.Println(italic("Need help?"))
 		fmt.Println(italic("https://github.com/Tchoupinax/k8s-labels-migrator/issues"))
