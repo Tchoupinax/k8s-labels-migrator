@@ -24,10 +24,11 @@ labels:
   - label: "maintenance"
     sync: true # remove label if match failed, default: false
     matcher:
-      title: "^chore(?!.*BREAKING).*"
       files:
         any:
           - "package.json"
+          - "go.mod"
+          - "go.sum"
 
   - label: "CI/CD"
     sync: true # remove label if match failed, default: false
