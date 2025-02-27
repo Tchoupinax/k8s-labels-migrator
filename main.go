@@ -17,8 +17,14 @@ func main() {
 	// Check if the helper is asked by flag
 	cliCommandDisplayHelp(os.Args)
 
-	config, err := clientcmd.BuildConfigFromFlags("", os.Getenv("KUBECONFIG"))
+	path := os.Getenv("KUBECONFIG")
+	if path == "" {
+		path = "~/.kube/config"
+	}
+
+	config, err := clientcmd.BuildConfigFromFlags("", path)
 	if err != nil {
+		utils.LogError("Impossible to connect to the cluster. Check KUBECONFIG export correctly the path to your Kubernetes config.")
 		panic(err.Error())
 	}
 
