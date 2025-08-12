@@ -9,7 +9,7 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.6.8
 	github.com/mbndr/figlet4go v0.0.0-20190224160619-d6cef5b186ea
 	github.com/thedevsaddam/renderer v1.2.0
-	istio.io/client-go v1.26.3
+	istio.io/client-go v1.27.0
 	k8s.io/apimachinery v0.33.3
 	k8s.io/client-go v0.33.3
 )
@@ -53,7 +53,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	istio.io/api v1.26.3-0.20250708203130-20827773ee1b // indirect
+	istio.io/api v1.27.0-beta.0.0.20250731082105-36763529c462 // indirect
 	k8s.io/api v0.33.3 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20250318190949-c8a335a9a2ff // indirect
