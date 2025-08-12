@@ -209,6 +209,8 @@ istio.io/api v1.25.0-alpha.0.0.20250212060243-76cd29bc906f h1:C1+VOTJD74UQXW9TeE
 istio.io/api v1.25.0-alpha.0.0.20250212060243-76cd29bc906f/go.mod h1:QFzEXv/IT582T0FHZVp1QoolvE4ws0zz/vVO55blmlE=
 istio.io/api v1.26.3-0.20250708203130-20827773ee1b h1:s2XHljy1IKJvptAAsVLnC8+HiMKZjvw19ZKsiXmP58s=
 istio.io/api v1.26.3-0.20250708203130-20827773ee1b/go.mod h1:DTVGH6CLXj5W8FF9JUD3Tis78iRgT1WeuAnxfTz21Wg=
+istio.io/api v1.27.0-beta.0.0.20250731082105-36763529c462 h1:rmeRAAxlNrCj96Zlaf8r6YqU5kcU8Y7/96i29KPDHaY=
+istio.io/api v1.27.0-beta.0.0.20250731082105-36763529c462/go.mod h1:DTVGH6CLXj5W8FF9JUD3Tis78iRgT1WeuAnxfTz21Wg=
 istio.io/client-go v1.24.1 h1:m1hYt+S7zZZpiWHVnJkp9SFfQ9EApBhKL0LUaviKh9c=
 istio.io/client-go v1.24.1/go.mod h1:sCDBDJWQGJQz/1t3CHwUTDE5V7Nk6pFFkqBwhIg+LrI=
 istio.io/client-go v1.24.2 h1:JTTfBV6dv+AAW+AfccyrdX4T1f9CpsXd1Yzo1s/IYAI=
@@ -219,6 +221,8 @@ istio.io/client-go v1.25.0 h1:MMG8r1g+o2yEzVwi0AGSdB6EQyLEhYz8YMYQQIw8IZw=
 istio.io/client-go v1.25.0/go.mod h1:Y4qIjNIVCkpZMiq/e3C7tMjOm7aYUbxT6ebtmai1TRY=
 istio.io/client-go v1.26.3 h1:ryF4+Nyz5wDO4mVCzXcm2W+fqbnekY88Z36hTcv5fnw=
 istio.io/client-go v1.26.3/go.mod h1:u2p5L7UvjNswrrlHZ+QMlUOjERK2sXputywzyNhtTMg=
+istio.io/client-go v1.27.0 h1:G6FjXoebOpnYbgcGnBWa0I2TjOI8HJe6QydTGVPOYME=
+istio.io/client-go v1.27.0/go.mod h1:oUPY27HFv9fW32NtjxlgrRaa0dPIN6jYj/xGcjorLA0=
 k8s.io/api v0.32.0 h1:OL9JpbvAU5ny9ga2fb24X8H6xQlVp+aJMFlgtQjR9CE=
 k8s.io/api v0.32.0/go.mod h1:4LEwHZEf6Q/cG96F3dqR965sYOfmPM7rq81BLgsE0p0=
 k8s.io/api v0.32.1 h1:f562zw9cy+GvXzXf0CKlVQ7yHJVYzLfL6JAS4kOAaOc=
