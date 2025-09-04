@@ -15,7 +15,7 @@ jobs:
         version: [1.22, 1.23]
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.version }}
           cache: false
