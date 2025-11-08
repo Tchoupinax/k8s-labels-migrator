@@ -25,7 +25,7 @@ func NativeServiceResourceAnalyze(
 					Category:   "Native",
 					Kind:       "Service",
 					Name:       item.GetName(),
-					Labels:     item.ObjectMeta.Labels,
+					Labels:     item.Labels,
 					Selectors:  item.Spec.Selector,
 				})
 			}

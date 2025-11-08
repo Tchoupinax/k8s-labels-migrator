@@ -24,7 +24,7 @@ func NativeHPAResourceAnalyze(
 					Category:   "Native",
 					Kind:       "HorizontalPodAutoscaler",
 					Name:       item.GetName(),
-					Labels:     item.ObjectMeta.Labels,
+					Labels:     item.Labels,
 					Selectors: map[string]string{
 						"kind": "Deployment",
 						"name": item.Spec.ScaleTargetRef.Name,

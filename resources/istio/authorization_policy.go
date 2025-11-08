@@ -24,7 +24,7 @@ func IstioAuthorizationPolicyResourceAnalyze(
 					ApiVersion: "security.istio.io/v1beta1",
 					Category:   "Istio",
 					Kind:       "AuthorizationPolicy",
-					Labels:     item.ObjectMeta.Labels,
+					Labels:     item.Labels,
 					Selectors:  item.Spec.GetSelector().GetMatchLabels(),
 					Name:       item.GetName(),
 				})

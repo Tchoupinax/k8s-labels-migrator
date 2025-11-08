@@ -10,7 +10,7 @@ func CheckLabelKey(key string) error {
 	if r.MatchString(key) {
 		return nil
 	} else {
-		return fmt.Errorf("The label key does not respect this regex: ^[a-z]{1}[a-z./-]*[a-z]{1}$")
+		return fmt.Errorf("the label key does not respect this regex: ^[a-z]{1}[a-z./-]*[a-z]{1}$")
 	}
 }
 
@@ -19,6 +19,6 @@ func CheckLabelValue(key string) error {
 	if r.MatchString(key) {
 		return nil
 	} else {
-		return fmt.Errorf("The label value does not respect this regex: ^[a-z-]*$")
+		return fmt.Errorf("the label value does not respect this regex: ^[a-z-]*$")
 	}
 }
