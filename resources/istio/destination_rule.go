@@ -24,7 +24,7 @@ func IstioDestinationRuleResourceAnalyze(
 					ApiVersion: "networking.istio.io/v1beta1",
 					Category:   "Istio",
 					Kind:       "DestinationRule",
-					Labels:     item.ObjectMeta.Labels,
+					Labels:     item.Labels,
 					Selectors:  item.Spec.GetSubsets()[0].GetLabels(),
 					Name:       item.GetName(),
 				})

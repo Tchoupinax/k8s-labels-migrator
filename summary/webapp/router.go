@@ -2,22 +2,24 @@ package webapp
 
 import (
 	_ "embed"
-	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"text/template"
+	"time"
 
 	resource "github.com/Tchoupinax/k8s-labels-migrator/resources"
 	utils "github.com/Tchoupinax/k8s-labels-migrator/utils"
 	"github.com/thedevsaddam/renderer"
 )
 
+//nolint:gochecknoglobals
 var ViewRenderer *renderer.Render
 
 //go:embed views/summary.html
 var summaryHTMLPage string
 
-func init() {
+func Setup() {
 	ViewRenderer = renderer.New()
 }
 
@@ -35,7 +37,8 @@ func StartWebServer(
 	resources []resource.Resource,
 	podLabels map[string]string,
 ) {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		tmpl, _ := template.New("index").Parse(summaryHTMLPage)
 
 		ViewRenderer.FuncMap(template.FuncMap{
@@ -68,9 +71,17 @@ func StartWebServer(
 	utils.Check(err)
 
 	go func() {
-		httpServerError := http.ListenAndServe(":8080", nil)
-		if err := httpServerError; err != nil {
-			fmt.Println(err)
+		srv := &http.Server{
+			Addr:         ":8080",
+			Handler:      mux,
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 10 * time.Second,
+			IdleTimeout:  60 * time.Second,
+		}
+
+		log.Println("Starting server on :8080")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("server failed: %v", err)
 		}
 	}()
 }

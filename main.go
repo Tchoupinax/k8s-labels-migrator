@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Tchoupinax/k8s-labels-migrator/summary/webapp"
 	utils "github.com/Tchoupinax/k8s-labels-migrator/utils"
 	"github.com/mbndr/figlet4go"
 	istio "istio.io/client-go/pkg/clientset/versioned"
@@ -14,6 +15,8 @@ import (
 )
 
 func main() {
+	webapp.Setup()
+
 	// Check if the helper is asked by flag
 	cliCommandDisplayHelp(os.Args)
 
@@ -141,7 +144,6 @@ func main() {
 
 		AddLabelToIstioDestinatonRulesSelector(
 			namespace,
-			clientset,
 			istioClient,
 			deploymentName,
 			labelToChangeKey,

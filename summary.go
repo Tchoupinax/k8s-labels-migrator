@@ -56,7 +56,7 @@ func resourcesAnalyze(
 	startTime := time.Now()
 
 	deployment, _ := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
-	if deployment.ObjectMeta.Name == "" {
+	if deployment.Name == "" {
 		utils.LogError(fmt.Sprintf("The deployment \"%s\" was not found in the namespace \"%s\"", deploymentName, namespace))
 		os.Exit(1)
 	}
@@ -66,12 +66,12 @@ func resourcesAnalyze(
 		Kind:       "Deployment",
 		ApiVersion: "apps/v1",
 		Name:       deploymentName,
-		Labels:     deployment.ObjectMeta.Labels,
+		Labels:     deployment.Labels,
 		Selectors:  map[string]string{},
 		Category:   "Native",
 	})
 
-	podLabels := deployment.Spec.Template.ObjectMeta.Labels
+	podLabels := deployment.Spec.Template.Labels
 
 	// Native Services
 	services := native.NativeServiceResourceAnalyze(

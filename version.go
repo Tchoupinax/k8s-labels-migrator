@@ -8,6 +8,7 @@ import (
 	"github.com/fatih/color"
 )
 
+//nolint:gochecknoglobals // These values are set at build time via -ldflags
 var (
 	version   string
 	buildDate string
