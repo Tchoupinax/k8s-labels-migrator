@@ -12,14 +12,23 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [1.22, 1.23]
+        version: [1.25]
+
     steps:
       - uses: actions/checkout@v5
+
+      - id: vars
+        run: |
+          echo ::set-output name=go_version::$(cat go.mod | head -3 | tail -1 | cut -d ' ' -f 2)
+          echo "Using Go version ${{ steps.vars.outputs.go_version }}"
+
+
       - uses: actions/setup-go@v6
         with:
-          go-version: ${{ matrix.version }}
+          go-version: ${{ steps.vars.outputs.go_version }}
           cache: false
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:
-          version: v1.62
+          version: v2.5.0

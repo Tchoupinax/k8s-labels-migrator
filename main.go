@@ -141,7 +141,6 @@ func main() {
 
 		AddLabelToIstioDestinatonRulesSelector(
 			namespace,
-			clientset,
 			istioClient,
 			deploymentName,
 			labelToChangeKey,

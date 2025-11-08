@@ -11,7 +11,6 @@ import (
 	utils "github.com/Tchoupinax/k8s-labels-migrator/utils"
 	istio "istio.io/client-go/pkg/clientset/versioned"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 )
@@ -28,7 +27,7 @@ func MigrationWorkflow(
 ) {
 	currentService, _ := clientset.CoreV1().Services(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 	currentDeployment, err := clientset.AppsV1().Deployments(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
-	currentDestinationRule, _ := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Get(context.TODO(), deploymentName, v1.GetOptions{})
+	currentDestinationRule, _ := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Get(context.TODO(), deploymentName, metav1.GetOptions{})
 	if err != nil {
 		utils.LogError("No deployment found.")
 		os.Exit(1)
@@ -98,14 +97,14 @@ func MigrationWorkflow(
 	// Update the label of the deploy and pods
 	// If the key is empty, remove the label because we consider empty string is the order to remove the label
 	if removeLabel {
-		delete(futureOfficialDeployment.ObjectMeta.Labels, changingLabelKey)
-		delete(futureOfficialDeployment.Spec.Template.ObjectMeta.Labels, changingLabelKey)
+		delete(futureOfficialDeployment.Labels, changingLabelKey)
+		delete(futureOfficialDeployment.Spec.Template.Labels, changingLabelKey)
 		delete(futureOfficialDeployment.Spec.Selector.MatchLabels, changingLabelKey)
 	} else {
 		// Label of the deployment
-		futureOfficialDeployment.ObjectMeta.Labels[changingLabelKey] = changingLabelValue
+		futureOfficialDeployment.Labels[changingLabelKey] = changingLabelValue
 		// Label of the pod created by the deployment
-		futureOfficialDeployment.Spec.Template.ObjectMeta.Labels[changingLabelKey] = changingLabelValue
+		futureOfficialDeployment.Spec.Template.Labels[changingLabelKey] = changingLabelValue
 		// Then we must include the label in the matchSelector for the deployment to find pods
 		futureOfficialDeployment.Spec.Selector.MatchLabels[changingLabelKey] = changingLabelValue
 	}
@@ -172,7 +171,6 @@ func AddLabelToServiceSelector(
 
 func AddLabelToIstioDestinatonRulesSelector(
 	namespace string,
-	clientset *kubernetes.Clientset,
 	istioClient *istio.Clientset,
 	applicationName string,
 	changingLabelKey string,
@@ -181,7 +179,7 @@ func AddLabelToIstioDestinatonRulesSelector(
 ) {
 	utils.LogInfo("====== Additionnal step ====================================")
 	utils.LogInfo("9. Add the label as a selector in istio destination rules...")
-	currentDestinationRule, err := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Get(context.TODO(), applicationName, v1.GetOptions{})
+	currentDestinationRule, err := istioClient.NetworkingV1alpha3().DestinationRules(namespace).Get(context.TODO(), applicationName, metav1.GetOptions{})
 
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "not found") {

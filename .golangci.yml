@@ -1,82 +1,95 @@
-linters-settings:
-  lll:
-    line-length: 200
-  gocyclo:
-    min-complexity: 20
-  revive:
-    rules:
-      - name: dot-imports
-        disabled: true
-        #arguments:
-        #  - allowedPackages:
-        #      - "github.com/onsi/ginkgo"
-        #      - "github.com/onsi/ginkgo/v2"
-        #      - "github.com/onsi/gomega"
-
-  depguard:
-    rules:
-      prevent_unmaintained_packages:
-        list-mode: lax # allow unless explicitely denied
-        files:
-          - $all
-          - "!$test"
-        allow:
-          - $gostd
-        deny:
-          - pkg: io/ioutil
-            desc: "replaced by io and os packages since Go 1.16: https://tip.golang.org/doc/go1.16#ioutil"
-
+version: "2"
 linters:
   enable:
-    # - funlen
-    # - gocritic
-    # - godox
-    # - golint
-    # - wsl
+    - asasalint
+    - asciicheck
+    - bidichk
     - bodyclose
+    - contextcheck
     - depguard
     - dogsled
     - dupl
-    - errcheck
+    - durationcheck
+    - errchkjson
+    - exhaustive
+    - gocheckcompilerdirectives
     - gochecknoglobals
     - gochecknoinits
+    - gochecksumtype
     - gocognit
     - goconst
     - gocyclo
-    - gofmt
-    - goimports
     - gosec
-    - gosimple
-    - govet
-    - ineffassign
+    - gosmopolitan
     - lll
+    - loggercheck
+    - makezero
     - misspell
+    - musttag
     - nakedret
+    - nilerr
+    - nilnesserr
     - prealloc
+    - protogetter
+    - reassign
+    - recvcheck
     - revive
+    - rowserrcheck
+    - spancheck
+    - sqlclosecheck
     - staticcheck
-    - stylecheck
-    - typecheck
+    - testifylint
     - unconvert
     - unparam
-    - unused
     - whitespace
+    - zerologlint
   disable:
-    - noctx
     - errorlint
-
-  disable-all: false
-  presets:
-    - bugs
-    - unused
-  fast: false
-
-issues:
-  exclude-rules:
-    # Exclude some linters from running on tests files.
-    - path: _test\.go
-      linters:
-        - gochecknoglobals
-        - dupl
-  #include:
-  # - EXC0002
+    - noctx
+  settings:
+    depguard:
+      rules:
+        prevent_unmaintained_packages:
+          list-mode: lax
+          files:
+            - $all
+            - "!$test"
+          allow:
+            - $gostd
+          deny:
+            - pkg: io/ioutil
+              desc: "replaced by io and os packages since Go 1.16: https://tip.golang.org/doc/go1.16#ioutil"
+    gocyclo:
+      min-complexity: 20
+    lll:
+      line-length: 200
+    revive:
+      rules:
+        - name: dot-imports
+          disabled: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - dupl
+          - gochecknoglobals
+        path: _test\.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
