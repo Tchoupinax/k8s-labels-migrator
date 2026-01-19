@@ -9,7 +9,7 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.7.8
 	github.com/mbndr/figlet4go v0.0.0-20190224160619-d6cef5b186ea
 	github.com/thedevsaddam/renderer v1.2.0
-	istio.io/client-go v1.28.2
+	istio.io/client-go v1.28.3
 	k8s.io/apimachinery v0.35.0
 	k8s.io/client-go v0.35.0
 )
