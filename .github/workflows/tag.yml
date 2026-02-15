@@ -25,4 +25,4 @@ jobs:
         uses: tchoupinax/repo-config/shared-actions/steps/dx/update-brew-registry@v0
         with:
           patToken: ${{ secrets.BREW_COMITTER_PAT }}
-          formulaPath: ssh-list.rb
+          formulaPath: kubernetes-labels-migrator.rb
