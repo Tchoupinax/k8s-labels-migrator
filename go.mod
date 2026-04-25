@@ -6,12 +6,12 @@ toolchain go1.26.2
 
 require (
 	github.com/fatih/color v1.19.0
-	github.com/jedib0t/go-pretty/v6 v6.7.9
+	github.com/jedib0t/go-pretty/v6 v6.7.10
 	github.com/mbndr/figlet4go v0.0.0-20190224160619-d6cef5b186ea
 	github.com/thedevsaddam/renderer v1.2.0
 	istio.io/client-go v1.29.2
 	k8s.io/apimachinery v0.35.4
-	k8s.io/client-go v0.35.3
+	k8s.io/client-go v0.35.4
 )
 
 require (
@@ -67,7 +67,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	istio.io/api v1.29.2-0.20260408155000-a0e4e1cbfcc5 // indirect
-	k8s.io/api v0.35.3 // indirect
+	k8s.io/api v0.35.4 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20251125145642-4e65d59e963e // indirect
 	k8s.io/utils v0.0.0-20251219084037-98d557b7f1e7 // indirect
