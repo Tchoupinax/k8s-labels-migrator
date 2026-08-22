@@ -2,7 +2,7 @@ module github.com/Tchoupinax/k8s-labels-migrator
 
 go 1.26.0
 
-toolchain go1.26.5
+toolchain go1.27.0
 
 require (
 	github.com/fatih/color v1.19.0
