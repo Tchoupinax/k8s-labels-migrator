@@ -2,7 +2,7 @@ module github.com/Tchoupinax/k8s-labels-migrator
 
 go 1.26.0
 
-toolchain go1.27.3
+toolchain go1.27.4
 
 require (
 	github.com/fatih/color v1.19.0
@@ -10,7 +10,7 @@ require (
 	github.com/mbndr/figlet4go v0.0.0-20190224160619-d6cef5b186ea
 	github.com/thedevsaddam/renderer v1.2.0
 	github.com/thedevsaddam/renderer/v2 v2.0.0
-	istio.io/client-go v1.31.3
+	istio.io/client-go v1.32.0
 	k8s.io/apimachinery v0.37.2
 	k8s.io/client-go v0.37.2
 )
@@ -68,7 +68,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	istio.io/api v1.31.3-0.20261021173654-6bc70d5e00c2 // indirect
+	istio.io/api v1.32.0-alpha.0.0.20261021173038-97748e4cb005 // indirect
 	k8s.io/api v0.37.2 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260721132016-d427ff9ee9ad // indirect
